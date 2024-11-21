@@ -1,0 +1,3 @@
+[submodule "deployment"]
+	path = deployment
+	url = git@github.com:Simba-Avionic/deployment.git
