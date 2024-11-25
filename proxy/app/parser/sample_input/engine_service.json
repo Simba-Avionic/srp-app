@@ -1,0 +1,45 @@
+{
+    "include":[],
+    "package":"simba.apps",
+    "someip":{
+        "EngineService":{
+            "service_id":518,
+            "major_version":1,
+            "minor_version":0,
+            "methods":{
+                "Start":{
+                    "id":1,
+                    "data_structure":{
+                        "in":{
+                            "type":"void"
+                        },
+                        "out":{
+                            "type":"bool"
+                        }
+                    }
+                },
+                "SetMode":{
+                    "id":2,
+                    "data_structure":{
+                        "in":{
+                            "type":"uint8"
+                        },
+                        "out":{
+                            "type":"bool"
+                        }
+                    }
+                }
+            },
+            "events":{
+                "CurrentMode": {
+                    "id":32769,
+                    "data_structure":{
+                        "out":{
+                            "type":"uint8"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
