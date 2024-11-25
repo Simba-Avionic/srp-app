@@ -11,7 +11,7 @@ from someipy.service_discovery import construct_service_discovery
 from someipy.server_service_instance import construct_server_service_instance
 from someipy.logging import set_someipy_log_level
 
-from proxy.app.parser.dataclass.engineservice_dataclass import StartMsg
+from proxy.app.parser.dataclasses.engineservice_dataclass import StartMsg
 
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490
@@ -21,7 +21,7 @@ SAMPLE_INSTANCE_ID = 0x5678
 SAMPLE_METHOD_ID = 0x0123
 
 
-async def add_method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:
+async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:
     print(
         f"Received data: {' '.join(f'0x{b:02x}' for b in input_data)} from IP: {addr[0]} Port: {addr[1]}"
     )
@@ -61,7 +61,7 @@ async def main():
 
 
 
-    addition_method = Method(id=SAMPLE_METHOD_ID, method_handler=add_method_handler)
+    addition_method = Method(id=SAMPLE_METHOD_ID, method_handler=method_handler)
     service = (
         ServiceBuilder()
         .with_service_id(SAMPLE_SERVICE_ID)
