@@ -42,7 +42,7 @@ async def setup_server_service(service_discovery):
     service_instance = await construct_server_service_instance(
         engineservice,
         instance_id=sample_instance_id,
-        endpoint=(ipaddress.IPv4Address(interface_ip), 3000),
+        endpoint=(ipaddress.IPv4Address(interface_ip), 3001),
         ttl=5,
         sd_sender=service_discovery,
         cyclic_offer_delay_ms=2000,

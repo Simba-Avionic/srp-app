@@ -1,6 +1,8 @@
 import json
 from typing import Dict, Any
 
+from proxy.app import settings
+from proxy.app.utils import increment_port
 
 def load_json(file_path: str) -> Dict[str, Any]:
     with open(file_path, "r") as file:
@@ -11,7 +13,9 @@ def save_code(file_path: str, code: str):
         file.write(code)
 
 
-def generate_service_code(parsed_config, port=3002, ttl=5):
+
+
+def generate_service_code(parsed_config, ttl=5):
     services = parsed_config['someip']
     service_code = f"""
 import ipaddress
@@ -80,7 +84,7 @@ class ServiceManagerSingleton:
         self.{method_name.lower()}_instance = await construct_client_service_instance(
             service={service_name.lower()},
             instance_id={method_config['id']},
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), {port}),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), {settings.NEXT_PORT}),
             ttl={ttl},
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -88,13 +92,14 @@ class ServiceManagerSingleton:
         self.methods.append(self.{method_name.lower()}_instance) 
         self.service_discovery.attach(self.{method_name.lower()}_instance)
 """
+            increment_port()
 
         for event_name, event_config in service_config.get('events', {}).items():
             service_code += f"""
         self.{event_name.lower()}_instance = await construct_client_service_instance(
             service={service_name.lower()},
             instance_id={event_config['id']},
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), {port}),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), {settings.NEXT_PORT}),
             ttl={ttl},
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -104,6 +109,7 @@ class ServiceManagerSingleton:
         self.events.append(self.{event_name.lower()}_instance)
         self.service_discovery.attach(self.{event_name.lower()}_instance)
 """
+            increment_port()
 
     for service_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
@@ -121,8 +127,14 @@ class ServiceManagerSingleton:
         for method_name in service_config.get('methods', {}).keys():
             service_code += f"""
     async def {method_name}(self, {method_name.lower()}):
+        while not self.{method_name.lower()}_instance.service_found():
+            print("Waiting for service")
+            await asyncio.sleep(0.5)
+        
+        {method_name.lower()}_msg = {method_name}Msg()
+        {method_name.lower()}_msg.out.val = {method_name.lower()}
         method_result = await self.{method_name.lower()}_instance.call_method(
-            {service_config['methods'][method_name]['id']}, {method_name}Msg().serialize()
+            {service_config['methods'][method_name]['id']}, {method_name.lower()}_msg.serialize()
         )
         return method_result
 """

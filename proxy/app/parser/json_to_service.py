@@ -140,7 +140,7 @@ if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
 """
-    save_code(f'service/{service_variable_name}.py', service_code)
+    save_code(f'services/{service_variable_name}.py', service_code)
     return service_code
 
 
@@ -149,5 +149,5 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 
-input_json_path = 'input/engine_service.json'
+input_json_path = 'sample_input/env_service.json'
 process_service_json(input_json_path)

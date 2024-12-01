@@ -53,7 +53,7 @@ class ServiceManagerSingleton:
         self.newtempevent_1_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10000),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -66,7 +66,7 @@ class ServiceManagerSingleton:
         self.newtempevent_2_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32770,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10001),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -79,7 +79,7 @@ class ServiceManagerSingleton:
         self.newtempevent_3_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10002),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -92,7 +92,7 @@ class ServiceManagerSingleton:
         self.newpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32773,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10003),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -105,7 +105,7 @@ class ServiceManagerSingleton:
         self.newdpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10004),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

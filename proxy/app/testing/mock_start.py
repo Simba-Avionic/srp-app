@@ -16,9 +16,9 @@ from proxy.app.parser.dataclasses.engineservice_dataclass import StartMsg
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490
 interface_ip = "127.0.0.2"
-SAMPLE_SERVICE_ID = 0x1234
-SAMPLE_INSTANCE_ID = 0x5678
-SAMPLE_METHOD_ID = 0x0123
+SAMPLE_SERVICE_ID = 518
+SAMPLE_INSTANCE_ID = 1
+SAMPLE_METHOD_ID = 1
 
 
 async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:

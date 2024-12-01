@@ -1,4 +1,14 @@
-MULTICAST_GROUP="224.224.224.245"
-INTERFACE_IP="127.0.0.1"
-INTERFACE_IP_FINAL="10.101.0.1"
-SD_PORT = 30490
+import json
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, 'config.json')
+
+with open(config_path, 'r') as file:
+    data = json.load(file)
+
+MULTICAST_GROUP = data['MULTICAST_GROUP']
+INTERFACE_IP = data['INTERFACE_IP']
+INTERFACE_IP_FINAL = data['INTERFACE_IP_FINAL']
+SD_PORT = data['SD_PORT']
+NEXT_PORT = data['NEXT_PORT']

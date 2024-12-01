@@ -49,7 +49,7 @@ class ServiceManagerSingleton:
         self.start_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10005),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -60,7 +60,7 @@ class ServiceManagerSingleton:
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10006),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -71,7 +71,7 @@ class ServiceManagerSingleton:
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10007),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -90,14 +90,26 @@ class ServiceManagerSingleton:
             print(f"Error in deserialization: {e}")
 
     async def Start(self, start):
+        while not self.start_instance.service_found():
+            print("Waiting for service")
+            await asyncio.sleep(0.5)
+        
+        start_msg = StartMsg()
+        start_msg.out.val = start
         method_result = await self.start_instance.call_method(
-            1, StartMsg().serialize()
+            1, start_msg.serialize()
         )
         return method_result
 
     async def SetMode(self, setmode):
+        while not self.setmode_instance.service_found():
+            print("Waiting for service")
+            await asyncio.sleep(0.5)
+        
+        setmode_msg = SetModeMsg()
+        setmode_msg.out.val = setmode
         method_result = await self.setmode_instance.call_method(
-            2, SetModeMsg().serialize()
+            2, setmode_msg.serialize()
         )
         return method_result
 
