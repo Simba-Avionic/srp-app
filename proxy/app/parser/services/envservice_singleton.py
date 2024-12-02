@@ -11,11 +11,11 @@ from someipy import (
 from someipy.logging import set_someipy_log_level
 from someipy.service_discovery import construct_service_discovery
 from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
-from proxy.app.parser.dataclasses.envservice_dataclass import newTempEvent_1Msg
-from proxy.app.parser.dataclasses.envservice_dataclass import newTempEvent_2Msg
-from proxy.app.parser.dataclasses.envservice_dataclass import newTempEvent_3Msg
-from proxy.app.parser.dataclasses.envservice_dataclass import newPressEventMsg
-from proxy.app.parser.dataclasses.envservice_dataclass import newDPressEventMsg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_1Msg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_2Msg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_3Msg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newPressEventMsg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newDPressEventMsg
 
 class ServiceManagerSingleton:
     __instance = None

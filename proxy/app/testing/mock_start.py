@@ -11,7 +11,7 @@ from someipy.service_discovery import construct_service_discovery
 from someipy.server_service_instance import construct_server_service_instance
 from someipy.logging import set_someipy_log_level
 
-from proxy.app.parser.dataclasses.engineservice_dataclass import StartMsg
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartMsg
 
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490

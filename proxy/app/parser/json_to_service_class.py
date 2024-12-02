@@ -34,17 +34,17 @@ from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
 
     for service_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
-            service_code += f"from proxy.app.parser.dataclasses.{service_name.lower()}_dataclass import {event_name}Msg\n"
+            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {event_name}Msg\n"
         for method_name in service_config.get('methods', {}).keys():
-            service_code += f"from proxy.app.parser.dataclasses.{service_name.lower()}_dataclass import {method_name}Msg\n"
+            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {method_name}Msg\n"
 
     service_code += f"""
-class ServiceManagerSingleton:
+class {service_name}Manager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(ServiceManagerSingleton, cls).__new__(cls)
+            cls.__instance = super({service_name}Manager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -58,6 +58,22 @@ class ServiceManagerSingleton:
             service_code += f"        self.{method_name.lower()}_instance = None\n"
         for event_name in service_config.get('events', {}).keys():
             service_code += f"        self.{event_name.lower()}_instance = None\n"
+
+    for service_name, service_config in services.items():
+        for method_name in service_config.get('methods', {}).keys():
+            service_code += f"""
+    async def {method_name}(self, {method_name.lower()}):
+        while not self.{method_name.lower()}_instance.service_found():
+            print("Waiting for service")
+            await asyncio.sleep(0.5)
+
+        {method_name.lower()}_msg = {method_name}Msg()
+        {method_name.lower()}_msg.out.val = {method_name.lower()}
+        method_result = await self.{method_name.lower()}_instance.call_method(
+            {service_config['methods'][method_name]['id']}, {method_name.lower()}_msg.serialize()
+        )
+        return method_result
+    """
 
     service_code += f"""
 
@@ -89,7 +105,7 @@ class ServiceManagerSingleton:
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
         )
-        self.methods.append(self.{method_name.lower()}_instance) 
+        self.methods.append(self.{method_name}) 
         self.service_discovery.attach(self.{method_name.lower()}_instance)
 """
             increment_port()
@@ -123,22 +139,6 @@ class ServiceManagerSingleton:
             print(f"Error in deserialization: {{e}}")
 """
 
-    for service_name, service_config in services.items():
-        for method_name in service_config.get('methods', {}).keys():
-            service_code += f"""
-    async def {method_name}(self, {method_name.lower()}):
-        while not self.{method_name.lower()}_instance.service_found():
-            print("Waiting for service")
-            await asyncio.sleep(0.5)
-        
-        {method_name.lower()}_msg = {method_name}Msg()
-        {method_name.lower()}_msg.out.val = {method_name.lower()}
-        method_result = await self.{method_name.lower()}_instance.call_method(
-            {service_config['methods'][method_name]['id']}, {method_name.lower()}_msg.serialize()
-        )
-        return method_result
-"""
-
     service_code += """
     async def shutdown(self):
         if self.service_discovery:
@@ -151,10 +151,10 @@ class ServiceManagerSingleton:
                 await method.close()
 """
 
-    service_code += """
+    service_code += f"""
 async def main():
     set_someipy_log_level(logging.DEBUG)
-    service_manager = ServiceManagerSingleton()
+    service_manager = {service_name}Manager()
     await service_manager.setup_service_discovery()
     await service_manager.setup_manager()
     try:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 """
 
-    save_code(f'services/{service_name.lower()}_singleton.py', service_code)
+    save_code(f'services/{service_name.lower()}.py', service_code)
     return service_code
 
 
