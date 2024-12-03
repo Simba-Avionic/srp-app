@@ -43,7 +43,6 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
 
     # Perform the addition
     sum = StartMsg()
-    sum.out = Bool(False)
 
     print(f"Send back: {' '.join(f'0x{b:02x}' for b in sum.serialize())}")
 

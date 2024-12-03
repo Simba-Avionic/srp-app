@@ -51,6 +51,7 @@ class {service_name}Manager:
         self.service_discovery = None
         self.methods = []
         self.events = []
+        self.initialized = False
 """
 
     for service_name, service_config in services.items():
@@ -58,11 +59,18 @@ class {service_name}Manager:
             service_code += f"        self.{method_name.lower()}_instance = None\n"
         for event_name in service_config.get('events', {}).keys():
             service_code += f"        self.{event_name.lower()}_instance = None\n"
-
+    service_code += f"""
+    async def ensure_initialized(self):
+        if not self.initialized:
+            await self.setup_service_discovery()
+            await self.setup_manager()
+            self.initialized = True
+    """
     for service_name, service_config in services.items():
         for method_name in service_config.get('methods', {}).keys():
             service_code += f"""
     async def {method_name}(self, {method_name.lower()}):
+        await self.ensure_initialized()
         while not self.{method_name.lower()}_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)

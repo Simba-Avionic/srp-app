@@ -1,24 +1,27 @@
-
 from flask import Blueprint, jsonify, request
-import asyncio
 
 engine_bp = Blueprint('engine', __name__)
-from proxy.app.parser.services.engineservice import EngineServiceManager as manager
+
+from proxy.app.parser.services.engineservice import EngineServiceManager
 
 
 @engine_bp.route('/SetMode', methods=['POST'])
-def SetMode():
+async def SetMode():
     data = request.json or {}
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(manager.SetMode(**data))
-    return jsonify({"result": result})
+    try:
+        service_manager = EngineServiceManager()
+        result = await service_manager.SetMode(data["setmode"])
+        return jsonify({"result": result}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @engine_bp.route('/Start', methods=['POST'])
-def Start():
+async def Start():
     data = request.json or {}
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(manager.Start(**data))
-    return jsonify({"result": result})
+    try:
+        service_manager = EngineServiceManager()
+        result = await service_manager.Start(start=data["start"])
+        return jsonify({"result": result}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 

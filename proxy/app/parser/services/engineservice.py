@@ -27,11 +27,19 @@ class EngineServiceManager:
         self.service_discovery = None
         self.methods = []
         self.events = []
+        self.initialized = False
         self.start_instance = None
         self.setmode_instance = None
         self.currentmode_instance = None
 
+    async def ensure_initialized(self):
+        if not self.initialized:
+            await self.setup_service_discovery()
+            await self.setup_manager()
+            self.initialized = True
+    
     async def Start(self, start):
+        await self.ensure_initialized()
         while not self.start_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)
@@ -44,6 +52,7 @@ class EngineServiceManager:
         return method_result
     
     async def SetMode(self, setmode):
+        await self.ensure_initialized()
         while not self.setmode_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)
@@ -73,7 +82,7 @@ class EngineServiceManager:
         self.start_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10038),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10041),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -84,7 +93,7 @@ class EngineServiceManager:
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10039),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10042),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -95,7 +104,7 @@ class EngineServiceManager:
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10040),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10043),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -128,7 +137,6 @@ async def main():
     service_manager = EngineServiceManager()
     await service_manager.setup_service_discovery()
     await service_manager.setup_manager()
-    await service_manager.Start(False)
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
