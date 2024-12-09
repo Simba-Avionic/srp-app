@@ -45,6 +45,7 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
         return result
 
     sum = StartMsg()
+
     sum.out = Bool(False)
     print(f"Send back: {' '.join(f'0x{b:02x}' for b in sum.serialize())}")
     result.message_type = MessageType.RESPONSE

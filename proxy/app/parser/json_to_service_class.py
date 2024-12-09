@@ -34,9 +34,10 @@ from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
 
     for service_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
-            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {event_name}Msg\n"
+            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {event_name}Out\n"
+
         for method_name in service_config.get('methods', {}).keys():
-            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {method_name}Msg\n"
+            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {method_name}In\n"
 
     service_code += f"""
 class {service_name}Manager:
@@ -66,20 +67,31 @@ class {service_name}Manager:
             await self.setup_manager()
             self.initialized = True
     """
-    for service_name, service_config in services.items():
-        for method_name in service_config.get('methods', {}).keys():
-            service_code += f"""
-    async def {method_name}(self, {method_name.lower()}):
+    for method_name, method_config in service_config.get('methods', {}).items():
+        in_type = method_config['data_structure']['in']['type']
+        service_code += f"""
+    async def {method_name}(self{', ' + method_name.lower() if in_type != 'void' else ''}):
         await self.ensure_initialized()
         while not self.{method_name.lower()}_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)
+    """
 
-        {method_name.lower()}_msg = {method_name}Msg()
-        {method_name.lower()}_msg.out.val = {method_name.lower()}
+        if in_type == 'void':
+            service_code += f"""
         method_result = await self.{method_name.lower()}_instance.call_method(
-            {service_config['methods'][method_name]['id']}, {method_name.lower()}_msg.serialize()
+            {method_config['id']}, b''
         )
+    """
+        else:
+            service_code += f"""
+        {method_name.lower()}_msg = {method_name}In()
+        {method_name.lower()}_msg.data.value = {method_name.lower()}
+        method_result = await self.{method_name.lower()}_instance.call_method(
+            {method_config['id']}, {method_name.lower()}_msg.serialize()
+        )
+    """
+        service_code += """
         return method_result
     """
 
@@ -141,7 +153,7 @@ class {service_name}Manager:
     def callback_{event_name.lower()}_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {{len(someip_message.payload)}} bytes for event {{someip_message.header.method_id}}. Attempting deserialization...")
-            {event_name}_msg = {event_name}Msg().deserialize(someip_message.payload)
+            {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
             print({event_name}_msg)
         except Exception as e:
             print(f"Error in deserialization: {{e}}")

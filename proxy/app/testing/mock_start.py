@@ -1,7 +1,6 @@
 import asyncio
 import ipaddress
 import logging
-from pickle import FALSE
 from typing import Tuple
 
 from someipy import TransportLayerProtocol, MethodResult, ReturnCode, MessageType
@@ -11,7 +10,9 @@ from someipy.service_discovery import construct_service_discovery
 from someipy.server_service_instance import construct_server_service_instance
 from someipy.logging import set_someipy_log_level
 
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartMsg
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartIn
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartOut
+
 
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490
@@ -27,28 +28,14 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
     )
 
     result = MethodResult()
+    start = StartOut()
+    start.data.value = False
 
-    try:
-        # Deserialize the input data
-        addends = StartMsg()
-        addends.deserialize(input_data)
-
-    except Exception as e:
-        print(f"Error during deserialization: {e}")
-
-        # Set the return code to E_MALFORMED_MESSAGE and return
-        result.message_type = MessageType.RESPONSE
-        result.return_code = ReturnCode.E_MALFORMED_MESSAGE
-        return result
-
-    # Perform the addition
-    sum = StartMsg()
-
-    print(f"Send back: {' '.join(f'0x{b:02x}' for b in sum.serialize())}")
+    print(f"Send back: {' '.join(f'0x{b:02x}' for b in start.serialize())}")
 
     result.message_type = MessageType.RESPONSE
     result.return_code = ReturnCode.E_OK
-    result.payload = sum.serialize()
+    result.payload = start.serialize()
     return result
 
 
@@ -57,8 +44,6 @@ async def main():
     service_discovery = await construct_service_discovery(
         SD_MULTICAST_GROUP, SD_PORT, interface_ip
     )
-
-
 
     addition_method = Method(id=SAMPLE_METHOD_ID, method_handler=method_handler)
     service = (

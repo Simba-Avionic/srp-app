@@ -11,9 +11,9 @@ from someipy import (
 from someipy.logging import set_someipy_log_level
 from someipy.service_discovery import construct_service_discovery
 from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentModeMsg
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartMsg
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeMsg
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentModeOut
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartIn
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeIn
 
 class EngineServiceManager:
     __instance = None
@@ -38,17 +38,16 @@ class EngineServiceManager:
             await self.setup_manager()
             self.initialized = True
     
-    async def Start(self, start):
+    async def Start(self):
         await self.ensure_initialized()
         while not self.start_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)
-
-        start_msg = StartMsg()
-        start_msg.out.val = start
+    
         method_result = await self.start_instance.call_method(
-            1, start_msg.serialize()
+            1, b''
         )
+    
         return method_result
     
     async def SetMode(self, setmode):
@@ -56,12 +55,13 @@ class EngineServiceManager:
         while not self.setmode_instance.service_found():
             print("Waiting for service")
             await asyncio.sleep(0.5)
-
-        setmode_msg = SetModeMsg()
-        setmode_msg.out.val = setmode
+    
+        setmode_msg = SetModeIn()
+        setmode_msg.data.value = setmode
         method_result = await self.setmode_instance.call_method(
             2, setmode_msg.serialize()
         )
+    
         return method_result
     
 
@@ -82,7 +82,7 @@ class EngineServiceManager:
         self.start_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10041),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10093),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -93,7 +93,7 @@ class EngineServiceManager:
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10042),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10094),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -104,7 +104,7 @@ class EngineServiceManager:
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10043),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10095),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -117,7 +117,7 @@ class EngineServiceManager:
     def callback_currentmode_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            CurrentMode_msg = CurrentModeMsg().deserialize(someip_message.payload)
+            CurrentMode_msg = CurrentModeOut().deserialize(someip_message.payload)
             print(CurrentMode_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")

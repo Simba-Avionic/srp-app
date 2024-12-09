@@ -11,30 +11,37 @@ from someipy import (
 from someipy.logging import set_someipy_log_level
 from someipy.service_discovery import construct_service_discovery
 from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_1Msg
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_2Msg
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_3Msg
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newPressEventMsg
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newDPressEventMsg
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_1Out
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_2Out
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_3Out
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newPressEventOut
+from proxy.app.parser.custom_dataclasses.envservice_dataclass import newDPressEventOut
 
-class ServiceManagerSingleton:
+class EnvServiceManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(ServiceManagerSingleton, cls).__new__(cls)
+            cls.__instance = super(EnvServiceManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
         self.service_discovery = None
         self.methods = []
         self.events = []
+        self.initialized = False
         self.newtempevent_1_instance = None
         self.newtempevent_2_instance = None
         self.newtempevent_3_instance = None
         self.newpressevent_instance = None
         self.newdpressevent_instance = None
 
+    async def ensure_initialized(self):
+        if not self.initialized:
+            await self.setup_service_discovery()
+            await self.setup_manager()
+            self.initialized = True
+    
 
     async def setup_service_discovery(self):
         if not self.service_discovery:
@@ -53,7 +60,7 @@ class ServiceManagerSingleton:
         self.newtempevent_1_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10000),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10088),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -66,7 +73,7 @@ class ServiceManagerSingleton:
         self.newtempevent_2_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32770,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10001),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10089),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -79,7 +86,7 @@ class ServiceManagerSingleton:
         self.newtempevent_3_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10002),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10090),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -92,7 +99,7 @@ class ServiceManagerSingleton:
         self.newpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32773,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10003),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10091),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -105,7 +112,7 @@ class ServiceManagerSingleton:
         self.newdpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10004),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10092),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -118,7 +125,7 @@ class ServiceManagerSingleton:
     def callback_newtempevent_1_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            newTempEvent_1_msg = newTempEvent_1Msg().deserialize(someip_message.payload)
+            newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
             print(newTempEvent_1_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")
@@ -126,7 +133,7 @@ class ServiceManagerSingleton:
     def callback_newtempevent_2_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            newTempEvent_2_msg = newTempEvent_2Msg().deserialize(someip_message.payload)
+            newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
             print(newTempEvent_2_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")
@@ -134,7 +141,7 @@ class ServiceManagerSingleton:
     def callback_newtempevent_3_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            newTempEvent_3_msg = newTempEvent_3Msg().deserialize(someip_message.payload)
+            newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
             print(newTempEvent_3_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")
@@ -142,7 +149,7 @@ class ServiceManagerSingleton:
     def callback_newpressevent_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            newPressEvent_msg = newPressEventMsg().deserialize(someip_message.payload)
+            newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
             print(newPressEvent_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")
@@ -150,7 +157,7 @@ class ServiceManagerSingleton:
     def callback_newdpressevent_msg(self, someip_message: SomeIpMessage) -> None:
         try:
             print(f"Received {len(someip_message.payload)} bytes for event {someip_message.header.method_id}. Attempting deserialization...")
-            newDPressEvent_msg = newDPressEventMsg().deserialize(someip_message.payload)
+            newDPressEvent_msg = newDPressEventOut().deserialize(someip_message.payload)
             print(newDPressEvent_msg)
         except Exception as e:
             print(f"Error in deserialization: {e}")
@@ -167,7 +174,7 @@ class ServiceManagerSingleton:
 
 async def main():
     set_someipy_log_level(logging.DEBUG)
-    service_manager = ServiceManagerSingleton()
+    service_manager = EnvServiceManager()
     await service_manager.setup_service_discovery()
     await service_manager.setup_manager()
     try:

@@ -7,27 +7,50 @@ from someipy.serialization import (
 
 
 @dataclass
-class StartMsg(SomeIpPayload):
-    in_data: None
-    out: Bool
+class StartIn(SomeIpPayload):
+    data: bytes
 
     def __init__(self):
-        self.out = Bool()
+        self.data = b''
 
 
 @dataclass
-class SetModeMsg(SomeIpPayload):
-    in_data: Uint8
-    out: Bool
+class StartOut(SomeIpPayload):
+    data: Bool
 
     def __init__(self):
-        self.in_data = Uint8()
-        self.out = Bool()
+        self.data = Bool()
+
 
 
 @dataclass
-class CurrentModeMsg(SomeIpPayload):
-    out: Uint8
+class SetModeIn(SomeIpPayload):
+    data: Uint8
 
     def __init__(self):
-        self.out = Uint8()
+        self.data = Uint8()
+
+
+@dataclass
+class SetModeOut(SomeIpPayload):
+    data: Bool
+
+    def __init__(self):
+        self.data = Bool()
+
+
+
+@dataclass
+class CurrentModeIn(SomeIpPayload):
+    data: bytes
+
+    def __init__(self):
+        self.data = b''
+
+
+@dataclass
+class CurrentModeOut(SomeIpPayload):
+    data: Uint8
+
+    def __init__(self):
+        self.data = Uint8()

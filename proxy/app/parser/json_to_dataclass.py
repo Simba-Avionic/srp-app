@@ -4,7 +4,7 @@ from typing import Dict, Any, Set
 
 def parse_type(data_type: str) -> str:
     type_mapping = {
-        "void": "None",
+        "void": "bytes",
         "bool": "Bool",
         "uint8": "Uint8",
         "uint16": "Uint16",
@@ -47,23 +47,38 @@ def generate_class(name: str, data_structure: Dict[str, Any]) -> str:
     in_data = data_structure.get("in")
     out_data = data_structure.get("out")
 
-    in_type = parse_type(in_data["type"]) if in_data else None
-    out_type = parse_type(out_data["type"]) if out_data else None
+    in_type = parse_type(in_data["type"]) if in_data else "bytes"
+    out_type = parse_type(out_data["type"]) if out_data else "bytes"
 
-    class_definition = ["@dataclass", f"class {name}Msg(SomeIpPayload):"]
+    class_definitions = []
 
     if in_type:
-        class_definition.append(f"    in_data: {in_type}")
-    if out_type:
-        class_definition.append(f"    out: {out_type}")
+        in_class = [
+            "@dataclass",
+            f"class {name}In(SomeIpPayload):",
+            f"    data: {in_type}",
+            "",
+            f"    def __init__(self):",
+            f"        self.data = b''" if in_type == "bytes" else f"        self.data = {in_type}()",
+            "",
+        ]
+        class_definitions.append("\n".join(in_class))
 
-    class_definition.append("\n    def __init__(self):")
-    if in_type and in_type != "None":
-        class_definition.append(f"        self.in_data = {in_type}()")
     if out_type:
-        class_definition.append(f"        self.out = {out_type}()")
+        out_class = [
+            "@dataclass",
+            f"class {name}Out(SomeIpPayload):",
+            f"    data: {out_type}",
+            "",
+            f"    def __init__(self):",
+            f"        self.data = b''" if out_type == "bytes" else f"        self.data = {out_type}()",
+            "",
+        ]
+        class_definitions.append("\n".join(out_class))
 
-    return "\n".join(class_definition)
+
+    return "\n\n".join(class_definitions)
+
 
 
 def generate_code(json_data: Dict[str, Any]) -> str:
@@ -75,7 +90,7 @@ def generate_code(json_data: Dict[str, Any]) -> str:
     ]
 
     for t in sorted(required_types):
-        if t != "None":
+        if t != "bytes":
             imports.append(f"    {t},")
 
     if len(imports) > 2:
@@ -113,7 +128,7 @@ def save_code(file_path: str, code: str):
         file.write(code)
 
 
-json_input = load_json("sample_input/engine_service.json")
+json_input = load_json("sample_input/env_service.json")
 generated_code, name = generate_code(json_input)
 
-save_code(f"dataclasses/{name.lower()}_dataclass.py", generated_code)
+save_code(f"custom_dataclasses/{name.lower()}_dataclass.py", generated_code)
