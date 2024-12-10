@@ -1,0 +1,54 @@
+{
+    "include":[],
+    "package":"simba.env",
+    "someip":{
+        "EnvService":{
+            "service_id":514,
+            "major_version":1,
+            "minor_version":0,
+            "methods":{},
+            "events":{
+                "newTempEvent_1": {
+                    "id":32769,
+                    "data_structure":{
+                        "out":{
+                            "type":"int16"
+                        }
+                    }
+                },
+                "newTempEvent_2": {
+                    "id":32770,
+                    "data_structure":{
+                        "out":{
+                           "type":"int16"
+                        }
+                    }
+                },
+                "newTempEvent_3": {
+                    "id":32771,
+                    "data_structure":{
+                        "out":{
+                            "type":"int16"
+                        }
+                    }
+                },
+                "newPressEvent": {
+                    "id":32773,
+                    "data_structure":{
+                        "out":{
+                            "type":"int16"
+                        }
+                    }
+                },
+                "newDPressEvent": {
+                    "id":32771,
+                    "data_structure":{
+                        "out":{
+                            "type":"int16"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
