@@ -86,7 +86,7 @@ class {service_name}Manager:
         else:
             service_code += f"""
         {method_name.lower()}_msg = {method_name}In()
-        {method_name.lower()}_msg.data.value = {method_name.lower()}
+        {method_name.lower()}_msg.from_json({method_name.lower()})
         method_result = await self.{method_name.lower()}_instance.call_method(
             {method_config['id']}, {method_name.lower()}_msg.serialize()
         )

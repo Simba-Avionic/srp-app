@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Any, Set
-
+from dataclasses import dataclass
 
 def parse_type(data_type: str) -> str:
     type_mapping = {
@@ -43,6 +43,24 @@ def collect_required_types(json_data: Dict[str, Any]) -> Set[str]:
     return required_types
 
 
+def get_cast_function(data_type: str):
+    """Returns a function to cast the value based on the data type."""
+    type_cast_map = {
+        "Bool": bool,
+        "Uint8": int,
+        "Uint16": int,
+        "Uint32": int,
+        "Uint64": int,
+        "Sint8": int,
+        "Sint16": int,
+        "Sint32": int,
+        "Sint64": int,
+        "Float32": float,
+        "Float64": float
+    }
+    return type_cast_map.get(data_type, str)
+
+
 def generate_class(name: str, data_structure: Dict[str, Any]) -> str:
     in_data = data_structure.get("in")
     out_data = data_structure.get("out")
@@ -59,7 +77,9 @@ def generate_class(name: str, data_structure: Dict[str, Any]) -> str:
             f"    data: {in_type}",
             "",
             f"    def __init__(self):",
-            f"        self.data = b''" if in_type == "bytes" else f"        self.data = {in_type}()",
+            f"        self.data = b''" if in_type == "bytes" else f"        self.data = {in_type}()\n",
+            ""
+            if in_type == "bytes" else f"    def from_json(self, json_argument):"  f"\n        self.data.value = {get_cast_function(in_type).__name__}(json_argument)",
             "",
         ]
         class_definitions.append("\n".join(in_class))
@@ -71,14 +91,15 @@ def generate_class(name: str, data_structure: Dict[str, Any]) -> str:
             f"    data: {out_type}",
             "",
             f"    def __init__(self):",
-            f"        self.data = b''" if out_type == "bytes" else f"        self.data = {out_type}()",
+            f"        self.data = b''" if out_type == "bytes" else f"        self.data = {out_type}()\n",
+
+            ""
+            if out_type == "bytes" else f"    def from_json(self, json_argument):" f"\n         self.data.value = {get_cast_function(out_type).__name__}(json_argument)",
             "",
         ]
         class_definitions.append("\n".join(out_class))
 
-
     return "\n\n".join(class_definitions)
-
 
 
 def generate_code(json_data: Dict[str, Any]) -> str:
@@ -128,7 +149,7 @@ def save_code(file_path: str, code: str):
         file.write(code)
 
 
-json_input = load_json("sample_input/env_service.json")
+json_input = load_json("sample_input/engine_service.json")
 generated_code, name = generate_code(json_input)
 
 save_code(f"custom_dataclasses/{name.lower()}_dataclass.py", generated_code)

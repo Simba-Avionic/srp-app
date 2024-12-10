@@ -3,5 +3,5 @@
     "INTERFACE_IP": "127.0.0.1",
     "INTERFACE_IP_FINAL": "10.101.0.1",
     "SD_PORT": 30490,
-    "NEXT_PORT": 10096
+    "NEXT_PORT": 10102
 }

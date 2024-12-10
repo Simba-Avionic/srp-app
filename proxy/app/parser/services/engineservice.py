@@ -57,7 +57,7 @@ class EngineServiceManager:
             await asyncio.sleep(0.5)
     
         setmode_msg = SetModeIn()
-        setmode_msg.data.value = setmode
+        setmode_msg.from_json(setmode)
         method_result = await self.setmode_instance.call_method(
             2, setmode_msg.serialize()
         )
@@ -82,7 +82,7 @@ class EngineServiceManager:
         self.start_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10093),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10099),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -93,7 +93,7 @@ class EngineServiceManager:
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10094),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10100),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -104,7 +104,7 @@ class EngineServiceManager:
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10095),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10101),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

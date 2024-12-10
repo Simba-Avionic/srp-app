@@ -1,7 +1,7 @@
 
 import socketio
 from flask_socketio import emit
-from proxy.app.parser.services.engineservice import EngineServiceManager as manager
+from proxy.app.parser.services.engineservice import EngineServiceManager
 
 namespace = '/engine'
 
