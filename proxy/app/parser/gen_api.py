@@ -63,18 +63,20 @@ def generate_socketio_code(manager_name, manager):
 
     for event_name in dir(manager):
         if callable(getattr(manager, event_name)) and not event_name.startswith("_") and "callback" in event_name:
+            words = event_name.split('_')
+            first_word = words[1]
             handlers_code += f"""
-@socketio.on('{event_name}', namespace=namespace)
-def {event_name}(message):
-    try:
-        response = manager.{event_name}(message)
-        emit('event_response', {{"event_name": '{event_name}', "response": response}})
-    except Exception as e:
-        emit('event_error', {{"error": str(e)}})
+    @socketio.on('{first_word}', namespace=namespace)
+    def {event_name}(message):
+        try:
+            manager = {type(manager).__name__}()
+            response = manager.get_{first_word}()
+            emit('{first_word}', {{'event_name': '{event_name}', 'response': response}})
+        except Exception as e:
+            emit('event_error', {{'error': str(e)}})
 """
 
     return f"""
-import socketio
 from flask_socketio import emit
 from proxy.app.parser.services.{manager_name}service import {type(manager).__name__}
 

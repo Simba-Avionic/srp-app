@@ -27,9 +27,7 @@ from someipy import (
     TransportLayerProtocol,
     ServiceBuilder, SomeIpMessage
 )
-from someipy.logging import set_someipy_log_level
-from someipy.service_discovery import construct_service_discovery
-from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
+from proxy.app.settings import INTERFACE_IP
 """
 
     for service_name, service_config in services.items():
@@ -49,24 +47,32 @@ class {service_name}Manager:
         return cls.__instance
 
     def __init__(self):
-        self.service_discovery = None
-        self.methods = []
-        self.events = []
-        self.initialized = False
+        if not hasattr(self, 'initialized'):
+            self.service_discovery = None
+            self.methods = []
+            self.events = []
+            self.initialized = False
 """
 
     for service_name, service_config in services.items():
         for method_name in service_config.get('methods', {}).keys():
-            service_code += f"        self.{method_name.lower()}_instance = None\n"
+            service_code += f"            self.{method_name.lower()}_instance = None\n"
         for event_name in service_config.get('events', {}).keys():
-            service_code += f"        self.{event_name.lower()}_instance = None\n"
+            service_code += f"            self.{event_name.lower()}_instance = None\n"
+            service_code += f"            self.{event_name.lower()} = None\n"
     service_code += f"""
     async def ensure_initialized(self):
         if not self.initialized:
-            await self.setup_service_discovery()
             await self.setup_manager()
             self.initialized = True
     """
+    for service_name, service_config in services.items():
+        for event_name in service_config.get('events', {}).keys():
+            service_code += f"""
+    def get_{event_name.lower()}(self):
+        return self.{event_name.lower()}
+    """
+
     for method_name, method_config in service_config.get('methods', {}).items():
         in_type = method_config['data_structure']['in']['type']
         service_code += f"""
@@ -96,14 +102,11 @@ class {service_name}Manager:
     """
 
     service_code += f"""
+    
+    def assign_service_discovery(self, new_sd):
+        self.service_discovery = new_sd
 
-    async def setup_service_discovery(self):
-        if not self.service_discovery:
-            self.service_discovery = await construct_service_discovery(MULTICAST_GROUP, SD_PORT, INTERFACE_IP)
-        return self.service_discovery
-
-    async def setup_manager(self) -> None:
-"""
+    async def setup_manager(self) -> None:"""
 
     for service_name, service_config in services.items():
         service_code += f"""
@@ -152,9 +155,8 @@ class {service_name}Manager:
             service_code += f"""
     def callback_{event_name.lower()}_msg(self, someip_message: SomeIpMessage) -> None:
         try:
-            print(f"Received {{len(someip_message.payload)}} bytes for event {{someip_message.header.method_id}}. Attempting deserialization...")
             {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
-            print({event_name}_msg)
+            self.{event_name.lower()} = {event_name}_msg.data.value
         except Exception as e:
             print(f"Error in deserialization: {{e}}")
 """
@@ -172,10 +174,9 @@ class {service_name}Manager:
 """
 
     service_code += f"""
-async def main():
-    set_someipy_log_level(logging.DEBUG)
+async def initialize_{service_name.lower()}(sd):
     service_manager = {service_name}Manager()
-    await service_manager.setup_service_discovery()
+    service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:
         await asyncio.Future()
@@ -184,8 +185,6 @@ async def main():
     finally:
         await service_manager.shutdown()
 
-if __name__ == "__main__":
-    asyncio.run(main())
 """
 
     save_code(f'services/{service_name.lower()}.py', service_code)

@@ -1,5 +1,4 @@
 
-import socketio
 from flask_socketio import emit
 from proxy.app.parser.services.engineservice import EngineServiceManager
 
@@ -15,11 +14,13 @@ def register_socketio_handlers(socketio):
         print("Client disconnected from engine namespace")
 
     
-@socketio.on('callback_currentmode_msg', namespace=namespace)
-def callback_currentmode_msg(message):
-    try:
-        response = manager.callback_currentmode_msg(message)
-        emit('event_response', {"event_name": 'callback_currentmode_msg', "response": response})
-    except Exception as e:
-        emit('event_error', {"error": str(e)})
+    @socketio.on('currentmode', namespace=namespace)
+    def callback_currentmode_msg(message):
+        try:
+            print("w")
+            manager = EngineServiceManager()
+            response = manager.get_currentmode()
+            emit('currentmode', {'event_name': 'callback_currentmode_msg', 'response': response+1})
+        except Exception as e:
+            emit('event_error', {'error': str(e)})
 

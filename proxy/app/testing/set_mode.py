@@ -28,6 +28,7 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
     try:
         in_data = SetModeIn()
         in_data.deserialize(input_data)
+        print(in_data.data)
     except Exception as e:
         print(f"Error during deserialization: {e}")
         result.message_type = MessageType.RESPONSE
