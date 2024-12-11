@@ -75,7 +75,7 @@ class EnvServiceManager:
         self.newtempevent_1_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10134),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10145),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -88,7 +88,7 @@ class EnvServiceManager:
         self.newtempevent_2_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32770,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10135),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10146),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -101,7 +101,7 @@ class EnvServiceManager:
         self.newtempevent_3_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10136),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10147),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -114,7 +114,7 @@ class EnvServiceManager:
         self.newpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32773,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10137),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10148),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -127,7 +127,7 @@ class EnvServiceManager:
         self.newdpressevent_instance = await construct_client_service_instance(
             service=envservice,
             instance_id=32771,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10138),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10149),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

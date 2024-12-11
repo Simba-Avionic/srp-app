@@ -1,7 +1,3 @@
-
-import sys
-import os
-
 from flask import Blueprint, jsonify, request
 from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeOut
 from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartOut
@@ -10,9 +6,7 @@ engine_bp = Blueprint('engine', __name__)
 
 from proxy.app.parser.services.engineservice import EngineServiceManager
 
-base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../api"))
-sys.path.append(base_path)
-from common import process_method_result
+from proxy.app.api.common import process_method_result
 
 
 @engine_bp.route('/setmode', methods=['POST'])

@@ -44,29 +44,29 @@ class EngineServiceManager:
         await self.ensure_initialized()
         while not self.start_instance.service_found():
             print("Waiting for service")
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0)
     
         method_result = await self.start_instance.call_method(
             1, b''
         )
     
         return method_result
-
+    
     async def SetMode(self, setmode):
         await self.ensure_initialized()
         while not self.setmode_instance.service_found():
             print("Waiting for service")
-            await asyncio.sleep(0.5)
-
+            await asyncio.sleep(0)
+    
         setmode_msg = SetModeIn()
         setmode_msg.from_json(setmode)
         method_result = await self.setmode_instance.call_method(
             2, setmode_msg.serialize()
         )
-
+    
         return method_result
-
-
+    
+    
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
 
@@ -81,7 +81,7 @@ class EngineServiceManager:
         self.start_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10139),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10142),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -92,7 +92,7 @@ class EngineServiceManager:
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10140),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10143),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -103,7 +103,7 @@ class EngineServiceManager:
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10141),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10144),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

@@ -61,7 +61,7 @@ async def main_send():
     msg = CurrentModeOut()
     try:
         while True:
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.00001)
             engine_msg = create_engine_message(msg)
             payload = engine_msg.serialize()
             service_instance.send_event(

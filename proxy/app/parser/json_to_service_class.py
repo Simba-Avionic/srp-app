@@ -80,7 +80,7 @@ class {service_name}Manager:
         await self.ensure_initialized()
         while not self.{method_name.lower()}_instance.service_found():
             print("Waiting for service")
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0)
     """
 
         if in_type == 'void':
@@ -196,5 +196,5 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 
-input_json_path = 'sample_input/engine_service.json'
+input_json_path = 'sample_input/env_service.json'
 process_service_json(input_json_path)

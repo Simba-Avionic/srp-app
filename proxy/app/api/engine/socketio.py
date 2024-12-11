@@ -4,6 +4,7 @@ from proxy.app.parser.services.engineservice import EngineServiceManager
 
 namespace = '/engine'
 
+
 def register_socketio_handlers(socketio):
     @socketio.on('connect', namespace=namespace)
     def connect():
@@ -13,14 +14,11 @@ def register_socketio_handlers(socketio):
     def disconnect():
         print("Client disconnected from engine namespace")
 
-    
     @socketio.on('currentmode', namespace=namespace)
     def callback_currentmode_msg(message):
         try:
-            print("w")
             manager = EngineServiceManager()
             response = manager.get_currentmode()
-            emit('currentmode', {'event_name': 'callback_currentmode_msg', 'response': response+1})
+            emit('currentmode', {'event_name': 'callback_currentmode_msg', 'response': response})
         except Exception as e:
             emit('event_error', {'error': str(e)})
-
