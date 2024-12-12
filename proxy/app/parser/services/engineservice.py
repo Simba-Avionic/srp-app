@@ -8,7 +8,9 @@ from someipy import (
     TransportLayerProtocol,
     ServiceBuilder, SomeIpMessage
 )
-from proxy.app.settings import INTERFACE_IP
+from someipy.service_discovery import construct_service_discovery
+
+from proxy.app.settings import INTERFACE_IP, MULTICAST_GROUP, SD_PORT
 from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentModeOut
 from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartIn
 from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeIn
@@ -34,9 +36,18 @@ class EngineServiceManager:
 
     async def ensure_initialized(self):
         if not self.initialized:
+            await self.setup_service_discovery()
             await self.setup_manager()
             self.initialized = True
-    
+
+    def get_initialized(self):
+        return self.initialized
+
+    async def setup_service_discovery(self):
+        if not self.service_discovery:
+            self.service_discovery = await construct_service_discovery(MULTICAST_GROUP, SD_PORT, INTERFACE_IP)
+        return self.service_discovery
+
     def get_currentmode(self):
         return self.currentmode
     
@@ -49,7 +60,7 @@ class EngineServiceManager:
         method_result = await self.start_instance.call_method(
             1, b''
         )
-    
+        self.initialized = False
         return method_result
     
     async def SetMode(self, setmode):
@@ -63,12 +74,10 @@ class EngineServiceManager:
         method_result = await self.setmode_instance.call_method(
             2, setmode_msg.serialize()
         )
-    
+        self.initialized = False
         return method_result
     
-    
-    def assign_service_discovery(self, new_sd):
-        self.service_discovery = new_sd
+
 
     async def setup_manager(self) -> None:
         engineservice = (
@@ -132,10 +141,13 @@ class EngineServiceManager:
 
 async def initialize_engineservice(sd):
     service_manager = EngineServiceManager()
-    service_manager.assign_service_discovery(sd)
+    await service_manager.setup_service_discovery()
     await service_manager.setup_manager()
     try:
-        await asyncio.Future()
+        while True:
+            await asyncio.sleep(1)
+            if not service_manager.get_initialized():
+                await service_manager.setup_manager()
     except asyncio.CancelledError:
         print("Shutting down...")
     finally:

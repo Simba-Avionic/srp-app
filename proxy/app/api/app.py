@@ -23,7 +23,7 @@ async def run_env_service_manager(sd):
 def run_flask_app():
     app = Flask(__name__)
     app.register_blueprint(engine_bp, url_prefix='/engine')
-    socketio = SocketIO(app, async_mode='gevent', message_queue='redis://')
+    socketio = SocketIO(app, async_mode='gevent')
     register_socketio_handlers(socketio)
     socketio.run(app, debug=True, use_reloader=False)
 
