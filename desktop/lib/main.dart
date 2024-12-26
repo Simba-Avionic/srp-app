@@ -1,3 +1,5 @@
+import 'package:desktop/views/home.dart';
+import 'package:desktop/widgets/sidebar_widget.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -7,13 +9,34 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SRP-APP',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xFF1F2937),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF1F2937),
+          secondary: Colors.blue,
+          surface: Color(0xFF1F2937),
+          background: Colors.white,
+          onPrimary: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1F2937),
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(color: Colors.white),
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Color(0xFF1F2937),
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black87),
+          bodyMedium: TextStyle(color: Colors.black87),
+        ),
       ),
       home: const MyHomePage(),
     );
@@ -28,22 +51,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('miau'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+        title: const Center(
+          child: Text(
+              'SRP-APP',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 24
             ),
-          ],
+          ),
         ),
+      ),
+      body: Row(
+        children: const [
+           Sidebar(),
+           Home(),
+        ],
       ),
     );
   }
