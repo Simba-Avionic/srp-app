@@ -87,6 +87,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed:(){},
+        label: const Text('Save Data', style: TextStyle(color: Colors.white)),
+        icon: const Icon(Icons.save, color: Colors.white,),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+      ),
     );
   }
 }
