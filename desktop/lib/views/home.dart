@@ -1,51 +1,62 @@
 import 'package:flutter/material.dart';
+import '../widgets/service_widget.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> serviceData = {
+      "serviceName": "Engine Service",
+      "serviceId": 518,
+      "methods": [
+        {"name": "Start", "id": 1, "in_type": "void"},
+        {"name": "SetMode", "id": 2, "in_type": "uint8"},
+      ],
+      "events": [
+        {"name": "CurrentMode", "id": 32769},
+      ],
+    };
+
+    final Map<String, dynamic> envService = {
+      "serviceName": "Env Service",
+      "serviceId": 514,
+      "methods": {},
+      "events": [
+        {"name": "newTempEvent_1", "id": 32769},
+        {"name": "newTempEvent_2", "id": 32770},
+        {"name": "newTempEvent_3", "id": 32771},
+        {"name": "newPressEvent", "id": 32773},
+        {"name": "newDPressEvent", "id": 32774},
+      ],
+    };
+
+
+
     return Container(
       color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Text(
-              'Epic Coders',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'active',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                ServiceWidget(
+                  serviceName: serviceData['serviceName'],
+                  serviceId: serviceData['serviceId'],
+                  methods: serviceData['methods'],
+                  events: serviceData['events'],
                 ),
-                const SizedBox(width: 16),
-                const Text('currency: USD'),
-                const SizedBox(width: 16),
-                const Text('location: America - New York'),
+
+                ServiceWidget(
+                  serviceName: envService['serviceName'],
+                  serviceId: envService['serviceId'],
+                  events: envService['events'],
+                ),
               ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              '4 active integrations for this organization',
-              style: TextStyle(fontSize: 16),
             ),
           ],
         ),

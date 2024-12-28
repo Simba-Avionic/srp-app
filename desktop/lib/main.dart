@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xFF1F2937),
+        secondaryHeaderColor: Color(0xFF004D40),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF1F2937),
           secondary: Colors.blue,
@@ -56,20 +57,35 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(
-          child: Text(
+          child: Padding(
+            padding: EdgeInsets.only(left: 250),
+            child: Text(
               'SRP-APP',
-            style: TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 24
+                fontSize: 24,
+              ),
             ),
           ),
         ),
       ),
-      body: Row(
-        children: const [
-           Sidebar(),
-           Home(),
-        ],
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          children: const [
+            SizedBox(
+              width: 250, // Fixed width for Sidebar
+              child: Sidebar(),
+            ),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Home(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
