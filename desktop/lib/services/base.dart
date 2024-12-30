@@ -1,3 +1,3 @@
 
 
-const url = "127.0.0.1";
+const base_url = "http://127.0.0.1:5000/";

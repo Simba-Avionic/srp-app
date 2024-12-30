@@ -54,7 +54,8 @@ class ServiceWidget extends StatelessWidget {
                     child: MethodWidget(
                       methodName: method['name'],
                       methodId: method['id'],
-                      in_type: method['in_type'],
+                      inType: method['in_type'],
+                      namespace: 'engine',
                     ),
                   );
                 },
