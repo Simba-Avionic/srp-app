@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:desktop/services/event_service.dart';
 
-class EventWidget extends StatelessWidget {
+class EventWidget extends StatefulWidget {
   final String eventName;
   final int eventId;
+  final String namespace;
 
   const EventWidget({
     super.key,
     required this.eventName,
     required this.eventId,
+    required this.namespace
   });
+
+  @override
+  _EventWidgetState createState() => _EventWidgetState();
+}
+
+class _EventWidgetState extends State<EventWidget> {
+  final EventService eventService = EventService();
+  String response = "No response yet";
+
+  @override
+  void initState() {
+    super.initState();
+    eventService.initializeSocket(widget.namespace, widget.eventName.toLowerCase());
+    eventService.connect();
+
+    eventService.onEventResponse((msg) {
+      setState(() {
+        response = msg;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +61,14 @@ class EventWidget extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "$eventName\n",
+                      text: "${widget.eventName}\n",
                       style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 20,
                       ),
                     ),
                     TextSpan(
-                      text: "Event ID: $eventId",
+                      text: "Event ID: ${widget.eventId}",
                       style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 12,
@@ -52,14 +76,13 @@ class EventWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-              )
-
+              ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text(
-            "Result: ",
-            style: TextStyle(
+          Text(
+            "Result: $response",
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 20,
             ),

@@ -74,6 +74,7 @@ class ServiceWidget extends StatelessWidget {
                     child: EventWidget(
                       eventName: event['name'],
                       eventId: event['id'],
+                      namespace: 'engine',
                     ),
                   );
                 },
