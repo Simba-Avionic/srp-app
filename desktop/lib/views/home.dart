@@ -6,7 +6,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> serviceData = {
+    final Map<String, dynamic> engineService = {
       "serviceName": "Engine Service",
       "serviceId": 518,
       "methods": [
@@ -21,7 +21,6 @@ class Home extends StatelessWidget {
     final Map<String, dynamic> envService = {
       "serviceName": "Env Service",
       "serviceId": 514,
-      "methods": {},
       "events": [
         {"name": "newTempEvent_1", "id": 32769},
         {"name": "newTempEvent_2", "id": 32770},
@@ -30,7 +29,6 @@ class Home extends StatelessWidget {
         {"name": "newDPressEvent", "id": 32774},
       ],
     };
-
 
 
     return Container(
@@ -45,16 +43,17 @@ class Home extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ServiceWidget(
-                  serviceName: serviceData['serviceName'],
-                  serviceId: serviceData['serviceId'],
-                  methods: serviceData['methods'],
-                  events: serviceData['events'],
+                  serviceName: engineService['serviceName'],
+                  serviceId: engineService['serviceId'],
+                  methods: engineService['methods'],
+                  events: engineService['events'],
                 ),
 
                 ServiceWidget(
                   serviceName: envService['serviceName'],
                   serviceId: envService['serviceId'],
                   events: envService['events'],
+                  methods: envService['methods'],
                 ),
               ],
             ),

@@ -18,6 +18,10 @@ class ServiceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String namespace = serviceName
+        .replaceAll(RegExp(r'service$', caseSensitive: false), '')
+        .toLowerCase()
+        .trim();
     return Container(
       width: MediaQuery.of(context).size.width / 2 - 200,
       decoration: BoxDecoration(
@@ -74,7 +78,7 @@ class ServiceWidget extends StatelessWidget {
                     child: EventWidget(
                       eventName: event['name'],
                       eventId: event['id'],
-                      namespace: 'engine',
+                      namespace: namespace,
                     ),
                   );
                 },
