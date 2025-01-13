@@ -43,9 +43,9 @@ async def setup_server_service(service_discovery):
         engineservice,
         instance_id=sample_instance_id,
         endpoint=(ipaddress.IPv4Address(interface_ip), 3001),
-        ttl=5,
+        ttl=255,
         sd_sender=service_discovery,
-        cyclic_offer_delay_ms=2000,
+        cyclic_offer_delay_ms=1000,
         protocol=TransportLayerProtocol.UDP,
     )
 
@@ -61,7 +61,7 @@ async def main_send():
     msg = CurrentModeOut()
     try:
         while True:
-            await asyncio.sleep(0.00001)
+            await asyncio.sleep(0.1)
             engine_msg = create_engine_message(msg)
             payload = engine_msg.serialize()
             service_instance.send_event(

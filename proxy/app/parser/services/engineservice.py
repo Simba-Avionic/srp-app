@@ -50,33 +50,32 @@ class EngineServiceManager:
 
     def get_currentmode(self):
         return self.currentmode
-    
+
     async def Start(self):
         await self.ensure_initialized()
         while not self.start_instance.service_found():
             print("Waiting for service")
-            await asyncio.sleep(0)
-    
+            await asyncio.sleep(0.5)
+
         method_result = await self.start_instance.call_method(
             1, b''
         )
-        self.initialized = False
+
         return method_result
-    
+
     async def SetMode(self, setmode):
         await self.ensure_initialized()
         while not self.setmode_instance.service_found():
             print("Waiting for service")
-            await asyncio.sleep(0)
-    
+            await asyncio.sleep(0.5)
+
         setmode_msg = SetModeIn()
         setmode_msg.from_json(setmode)
         method_result = await self.setmode_instance.call_method(
             2, setmode_msg.serialize()
         )
-        self.initialized = False
         return method_result
-    
+
 
 
     async def setup_manager(self) -> None:
@@ -91,30 +90,30 @@ class EngineServiceManager:
             service=engineservice,
             instance_id=1,
             endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10142),
-            ttl=5,
             sd_sender=self.service_discovery,
+            ttl=255,
             protocol=TransportLayerProtocol.UDP,
         )
-        self.methods.append(self.Start) 
+        self.methods.append(self.Start)
         self.service_discovery.attach(self.start_instance)
 
         self.setmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=2,
             endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10143),
-            ttl=5,
             sd_sender=self.service_discovery,
+            ttl=255,
             protocol=TransportLayerProtocol.UDP,
         )
-        self.methods.append(self.SetMode) 
+        self.methods.append(self.SetMode)
         self.service_discovery.attach(self.setmode_instance)
 
         self.currentmode_instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=32769,
             endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10144),
-            ttl=5,
             sd_sender=self.service_discovery,
+            ttl=255,
             protocol=TransportLayerProtocol.UDP,
         )
         self.currentmode_instance.register_callback(self.callback_currentmode_msg)
@@ -124,6 +123,7 @@ class EngineServiceManager:
 
     def callback_currentmode_msg(self, someip_message: SomeIpMessage) -> None:
         try:
+            print("miau miau miau miau miau")
             CurrentMode_msg = CurrentModeOut().deserialize(someip_message.payload)
             self.currentmode = CurrentMode_msg.data.value
         except Exception as e:
@@ -135,19 +135,14 @@ class EngineServiceManager:
         for event in self.events:
             if event:
                 await event.close()
-        for method in self.methods:
-            if method:
-                await method.close()
-
+        await self.start_instance.close()
+        await self.setmode_instance.close()
 async def initialize_engineservice(sd):
     service_manager = EngineServiceManager()
     await service_manager.setup_service_discovery()
     await service_manager.setup_manager()
     try:
-        while True:
-            await asyncio.sleep(1)
-            if not service_manager.get_initialized():
-                await service_manager.setup_manager()
+        await asyncio.Future()
     except asyncio.CancelledError:
         print("Shutting down...")
     finally:

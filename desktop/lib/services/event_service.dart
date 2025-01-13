@@ -64,7 +64,7 @@ class EventService {
 
   void _requestEvent() async {
     while (_socket.connected) {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 100));
       if (_event != null) {
         _socket.emit(_event!, 'Requesting event data');
       }

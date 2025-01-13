@@ -60,9 +60,9 @@ async def main():
             ipaddress.IPv4Address(interface_ip),
             3000,
         ),
-        ttl=5,
+        ttl=255,
         sd_sender=service_discovery,
-        cyclic_offer_delay_ms=2000,
+        cyclic_offer_delay_ms=1000,
         protocol=TransportLayerProtocol.UDP,
     )
     service_discovery.attach(service_instance_addition)
