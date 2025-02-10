@@ -11,7 +11,7 @@ from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentM
 
 sd_multicast_group = "224.224.224.245"
 sd_port = 30490
-interface_ip = "127.0.0.4"
+interface_ip = "127.0.0.3"
 
 sample_service_id = 518
 sample_eventgroup_id = 32769
@@ -48,6 +48,8 @@ async def setup_server_service(service_discovery):
         cyclic_offer_delay_ms=1000,
         protocol=TransportLayerProtocol.UDP,
     )
+
+
 
     service_instance.start_offer()
     service_discovery.attach(service_instance)

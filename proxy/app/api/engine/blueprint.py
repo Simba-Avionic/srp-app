@@ -16,7 +16,6 @@ async def setmode():
         service_manager = EngineServiceManager()
         params = data if data else {}  
         method_result = await service_manager.SetMode(**params)
-        await service_manager.setup_manager()
         return process_method_result(method_result, deserialization_class=SetModeOut)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -28,7 +27,6 @@ async def start():
         service_manager = EngineServiceManager()
         params = data if data else {}  
         method_result = await service_manager.Start(**params)
-        await service_manager.setup_manager()
         return process_method_result(method_result, deserialization_class=StartOut)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

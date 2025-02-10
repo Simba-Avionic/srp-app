@@ -11,6 +11,7 @@ def process_method_result(method_result, deserialization_class=None):
                 if deserialization_class:
                     deserialized_data = deserialization_class().deserialize(method_result.payload)
                     result_value = getattr(deserialized_data.data, 'value', deserialized_data)
+                    print("result is back")
                 else:
                     result_value = method_result.payload
                 print(f"result: {result_value}")

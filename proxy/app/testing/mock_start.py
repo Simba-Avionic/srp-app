@@ -51,9 +51,10 @@ async def main():
         .with_service_id(SAMPLE_SERVICE_ID)
         .with_major_version(1)
         .with_method(addition_method)
+
         .build()
     )
-    service_instance_addition = await construct_server_service_instance(
+    method_instance = await construct_server_service_instance(
         service,
         instance_id=SAMPLE_INSTANCE_ID,
         endpoint=(
@@ -65,15 +66,15 @@ async def main():
         cyclic_offer_delay_ms=1000,
         protocol=TransportLayerProtocol.UDP,
     )
-    service_discovery.attach(service_instance_addition)
+    service_discovery.attach(method_instance)
 
     print("Start offering service..")
-    service_instance_addition.start_offer()
+    method_instance.start_offer()
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
         print("Stop offering service..")
-        await service_instance_addition.stop_offer()
+        await method_instance.stop_offer()
     finally:
         print("Service Discovery close..")
         service_discovery.close()
