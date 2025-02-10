@@ -56,8 +56,7 @@ class {service_name}Manager:
     for service_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
             service_code += f"""
-            self.{event_name.lower()} = None
-    """
+            self.{event_name.lower()} = None"""
     # service and instance definition
     service_code += f"""
 
@@ -72,10 +71,12 @@ class {service_name}Manager:
     async def setup_manager(self) -> None:"""
 
     for service_name, service_config in services.items():
-        for event_name, event_config in service_config.get('events', {}).items():
+        event_ids = [event_config['id'] for event_config in service_config.get('events', {}).values()]
+
+        if event_ids:
             service_code += f"""            
         event_group = EventGroup(
-            id={event_config['id']}, event_ids=[{event_config['id']}]
+            id={event_ids[0]}, event_ids={event_ids}
         )"""
 
     for service_name, service_config in services.items():
@@ -181,5 +182,5 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 
-input_json_path = 'sample_input/engine_service.json'
+input_json_path = 'sample_input/env_service.json'
 process_service_json(input_json_path)
