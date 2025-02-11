@@ -109,19 +109,6 @@ async def setup_instances(service_discovery):
     )
     service_discovery.attach( method_instance)
     method_instance.start_offer()
-
-    # event_instance = await construct_server_service_instance(
-    #     service,
-    #     instance_id=EVENTGROUP_ID,
-    #     endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 3001),
-    #     ttl=255,
-    #     sd_sender=service_discovery,
-    #     cyclic_offer_delay_ms=2000,
-    #     protocol=TransportLayerProtocol.UDP,
-    # )
-
-    # service_discovery.attach(event_instance)
-    # event_instance.start_offer()
     return method_instance
 
 
@@ -133,13 +120,12 @@ async def main():
     msg = CurrentModeOut()
     try:
         while True:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)
             engine_msg = create_engine_message(msg)
             payload = engine_msg.serialize()
             method_service_instance.send_event(EVENTGROUP_ID, EVENT_ID, payload)
     except asyncio.CancelledError:
         await method_service_instance.stop_offer()
-      #  await event_instance.stop_offer()
     finally:
         service_discovery.close()
 

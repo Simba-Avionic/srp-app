@@ -8,7 +8,9 @@ from socketio import ASGIApp
 from someipy.logging import set_someipy_log_level
 
 from proxy.app.api.engine.socketio import register_engine_socketio
+from proxy.app.api.env.socketio import register_env_socketio
 from proxy.app.api.engine.router import router as engine_router
+from proxy.app.api.save_to_file.router import save_router
 from proxy.app.parser.services.engineservice import initialize_engineservice
 from proxy.app.parser.services.envservice import initialize_envservice
 from proxy.app.parser.services.service_discovery import initialize_service_discovery
@@ -20,8 +22,9 @@ asgi_app = ASGIApp(sio, other_asgi_app=app)
 
 # Register routes and Socket.IO handlers
 app.include_router(engine_router)
+app.include_router(save_router)
 register_engine_socketio(sio)
-
+register_env_socketio(sio)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

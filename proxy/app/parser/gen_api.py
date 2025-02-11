@@ -1,5 +1,6 @@
 import os
 
+from proxy.app.parser.services.engineservice import EngineServiceManager
 from proxy.app.parser.services.envservice import EnvServiceManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../api")
@@ -78,20 +79,20 @@ def generate_socketio_code(manager_name, manager):
         if callable(getattr(manager, method_name)) and method_name.startswith("get"):
             event_name = method_name[4:].lower()
             handlers_code += f"""
-        @sio.on('{event_name}', namespace=namespace)
-        async def {method_name}(sid, data):
-            try:
-                manager = {type(manager).__name__}()
-                response = manager.{method_name}()
-                await sio.emit('{event_name}', 
-                              {{'event_name': '{event_name}', 'response': response}},
-                              room=sid,
-                              namespace=namespace)
-            except Exception as e:
-                await sio.emit('event_error',
-                              {{'error': str(e)}},
-                              room=sid,
-                              namespace=namespace)
+    @sio.on('{event_name}', namespace=namespace)
+    async def {method_name}(sid, data):
+        try:
+            manager = {type(manager).__name__}()
+            response = manager.{method_name}()
+            await sio.emit('{event_name}', 
+                          {{'event_name': '{event_name}', 'response': response}},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            await sio.emit('event_error',
+                          {{'error': str(e)}},
+                          room=sid,
+                          namespace=namespace)
     """
 
     return f"""
@@ -135,5 +136,5 @@ def generate_service_code(manager_name, manager):
 
 
 if __name__ == "__main__":
-    manager = EnvServiceManager()
-    generate_service_code("env", manager)
+    manager = EngineServiceManager()
+    generate_service_code("engine", manager)

@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:desktop/views/home.dart';
 import 'package:desktop/widgets/sidebar_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -52,6 +54,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool isSaving = false;
+
+  void toggleSaving() async {
+    setState(() {
+      isSaving = !isSaving;
+    });
+
+    final body = {};
+
+    if (isSaving) {
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/save/start'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(body),
+      );
+      if (response.statusCode == 200) {
+        print("Started saving data...");
+      } else {
+        print("Failed to start saving data.");
+      }
+    } else {
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/save/stop'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(body),
+      );
+      if (response.statusCode == 200) {
+        print("Stopped saving data...");
+      } else {
+        print("Failed to stop saving data.");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Row(
           children: const [
             SizedBox(
-              width: 250, // Fixed width for Sidebar
+              width: 250,
               child: Sidebar(),
             ),
             Expanded(
@@ -88,9 +128,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed:(){},
-        label: const Text('Save Data', style: TextStyle(color: Colors.white)),
-        icon: const Icon(Icons.save, color: Colors.white,),
+        onPressed: toggleSaving,
+        label: Text(
+          isSaving ? 'Stop Saving' : 'Save Data',
+          style: const TextStyle(color: Colors.white),
+        ),
+        icon: Icon(
+          isSaving ? Icons.stop : Icons.save,
+          color: Colors.white,
+        ),
         backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
     );
