@@ -18,7 +18,7 @@ from someipy.service import Method
 from someipy.service_discovery import construct_service_discovery
 from someipy.logging import set_someipy_log_level
 
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartOut, CurrentModeOut
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartOut, CurrentModeOut, SetModeIn, SetModeOut
 
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490
@@ -32,7 +32,7 @@ INSTANCE_ID_METHOD = 1
 INSTANCE_ID_EVENT = 32769
 
 
-async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:
+async def start_method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:
     print(f"Received data: {' '.join(f'0x{b:02x}' for b in input_data)} from IP: {addr[0]} Port: {addr[1]}")
     result = MethodResult()
 
@@ -47,6 +47,33 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
     return result
 
 
+async def set_mode_method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResult:
+    print(
+        f"Received data: {' '.join(f'0x{b:02x}' for b in input_data)} from IP: {addr[0]} Port: {addr[1]}"
+    )
+
+    result = MethodResult()
+    try:
+        in_data = SetModeIn()
+        in_data.deserialize(input_data)
+        print(in_data.data)
+    except Exception as e:
+        print(f"Error during deserialization: {e}")
+        result.message_type = MessageType.RESPONSE
+        result.return_code = ReturnCode.E_MALFORMED_MESSAGE
+        return result
+
+    out = SetModeOut()
+    out.data.value = True
+
+    print(f"Send back: {' '.join(f'0x{b:02x}' for b in out.serialize())}")
+
+    result.message_type = MessageType.RESPONSE
+    result.return_code = ReturnCode.E_OK
+    result.payload = out.serialize()
+    return result
+
+
 def create_engine_message(msg: CurrentModeOut):
     msg.data.value = random.randint(1, 20)
     return msg
@@ -57,14 +84,16 @@ async def setup_service_discovery():
 
 
 async def setup_instances(service_discovery):
-    addition_method = Method(id=METHOD_ID, method_handler=method_handler)
+    start_method = Method(id=METHOD_ID, method_handler=start_method_handler)
+    setmode_method = Method(id=2, method_handler=set_mode_method_handler)
     engine_eventgroup = EventGroup(id=EVENTGROUP_ID, event_ids=[EVENT_ID])
 
     service = (
         ServiceBuilder()
         .with_service_id(SERVICE_ID)
         .with_major_version(1)
-        .with_method(addition_method)
+        .with_method(start_method)
+        .with_method(setmode_method)
         .with_eventgroup(engine_eventgroup)
         .build()
     )

@@ -1,8 +1,7 @@
 git+https://github.com/Simba-Avionic/someipy.git
-flask[async]==3.0.3
-flask_socketio == 5.4.1
-eventlet
-gunicorn
-gevent
-gevent-websocket
-redis
+fastapi
+socketio
+asyncio
+logging
+contextlib
+typing

@@ -11,7 +11,7 @@ class EventService {
     _event = event;
 
     _socket = IO.io(
-      'http://127.0.0.1:5000/$namespace',
+      'http://localhost:5000/$namespace',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .build(),
