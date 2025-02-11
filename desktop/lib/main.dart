@@ -57,13 +57,54 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isSaving = false;
 
   void toggleSaving() async {
-    setState(() {
-      isSaving = !isSaving;
-    });
-
-    final body = {};
-
     if (isSaving) {
+      // Ask for confirmation before stopping
+      bool? confirmStop = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Stop Saving Data?'),
+            content: const Text('Are you sure you want to stop saving data?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('Yes', style: TextStyle(color: Colors.red),),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('No',
+                  style: TextStyle(color: Colors.green),),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmStop == true) {
+        final body = {};
+        final response = await http.post(
+          Uri.parse('http://localhost:5000/save/stop'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode(body),
+        );
+        if (response.statusCode == 200) {
+          print("Stopped saving data...");
+          setState(() {
+            isSaving = false;
+          });
+        } else {
+          print("Failed to stop saving data.");
+        }
+      }
+    }
+    else{ //if not saving
+      final body = {};
       final response = await http.post(
         Uri.parse('http://localhost:5000/save/start'),
         headers: {
@@ -73,21 +114,11 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       if (response.statusCode == 200) {
         print("Started saving data...");
+        setState(() {
+          isSaving = true;
+        });
       } else {
         print("Failed to start saving data.");
-      }
-    } else {
-      final response = await http.post(
-        Uri.parse('http://localhost:5000/save/stop'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(body),
-      );
-      if (response.statusCode == 200) {
-        print("Stopped saving data...");
-      } else {
-        print("Failed to stop saving data.");
       }
     }
   }
