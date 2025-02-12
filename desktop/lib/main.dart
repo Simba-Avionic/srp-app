@@ -58,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void toggleSaving() async {
     if (isSaving) {
-      // Ask for confirmation before stopping
       bool? confirmStop = await showDialog(
         context: context,
         builder: (BuildContext context) {

@@ -1,12 +1,21 @@
-from fastapi import BackgroundTasks, APIRouter
+
 import csv
 import asyncio
+import os
+
+from fastapi import BackgroundTasks, APIRouter
 from datetime import datetime
 
 from proxy.app.parser.services.engineservice import EngineServiceManager
 from proxy.app.parser.services.envservice import EnvServiceManager
 
-csv_filename = 'data.csv'
+current_dir = os.getcwd()
+
+csv_filename = os.path.join(current_dir, '..', '..', '..','desktop', 'data', 'csv', 'data.csv')
+
+# Resolve the absolute path after the relative moves
+csv_filename = os.path.abspath(csv_filename)
+
 collected_data = []
 csv_lock = asyncio.Lock()
 
