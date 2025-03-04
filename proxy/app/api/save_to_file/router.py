@@ -1,4 +1,3 @@
-
 import csv
 import asyncio
 import os
@@ -13,10 +12,8 @@ current_dir = os.getcwd()
 
 csv_filename = os.path.join(current_dir, '..', '..', '..','desktop', 'data', 'csv', 'data.csv')
 
-# Resolve the absolute path after the relative moves
 csv_filename = os.path.abspath(csv_filename)
 
-collected_data = []
 csv_lock = asyncio.Lock()
 
 managers = [EngineServiceManager(), EnvServiceManager()]
@@ -36,26 +33,26 @@ header = generate_header()
 first_write = True
 
 
-async def save_to_csv():
-    global collected_data, first_write
+async def save_to_csv(data_generator):
+    global first_write
     async with csv_lock:
-        with open(csv_filename, mode='a', newline='') as file:
+        with open(csv_filename, mode='a', newline='', buffering=1) as file:
             writer = csv.writer(file)
 
             if first_write:
                 writer.writerow(header)
                 first_write = False
 
-            for row in collected_data:
+            async for row in data_generator:
                 writer.writerow(row)
-        collected_data = []
+                file.flush()
+                os.fsync(file.fileno())
 
 
 collect_data_flag = False
 
 
 async def collect_manager_data():
-    global collected_data
     while collect_data_flag:
         timestamp = datetime.now().strftime('%H:%M:%S.%f')
         current_row = [timestamp]
@@ -70,7 +67,7 @@ async def collect_manager_data():
                 print(f"Error collecting data: {e}")
 
         if current_row:
-            collected_data.append(current_row)
+            yield current_row
 
         await asyncio.sleep(0.1)
 
@@ -82,7 +79,8 @@ save_router = APIRouter(prefix="/save", tags=["save"])
 async def start_collecting(background_tasks: BackgroundTasks):
     global collect_data_flag
     collect_data_flag = True
-    background_tasks.add_task(collect_manager_data)
+    data_generator = collect_manager_data()
+    asyncio.create_task(save_to_csv(data_generator))
     return {"status": "Started collecting data"}
 
 
@@ -90,5 +88,4 @@ async def start_collecting(background_tasks: BackgroundTasks):
 async def stop_collecting():
     global collect_data_flag
     collect_data_flag = False
-    await save_to_csv()
-    return {"status": "Stopped collecting and data saved to CSV"}
+    return {"status": "Stopped collecting data"}
