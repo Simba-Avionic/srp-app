@@ -7,11 +7,11 @@ from someipy import ServiceBuilder, EventGroup, construct_server_service_instanc
 from someipy.logging import set_someipy_log_level
 from someipy.service_discovery import construct_service_discovery
 
-from proxy.app.parser.dataclasses.engineservice_dataclass import CurrentModeMsg
+from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentModeOut
 
 sd_multicast_group = "224.224.224.245"
 sd_port = 30490
-interface_ip = "127.0.0.2"
+interface_ip = "127.0.0.3"
 
 sample_service_id = 518
 sample_eventgroup_id = 32769
@@ -19,8 +19,8 @@ sample_event_id = 32769
 sample_instance_id = 32769
 
 
-def create_engine_message(msg: CurrentModeMsg):
-    msg.out.value = random.randint(1, 20)
+def create_engine_message(msg: CurrentModeOut):
+    msg.data.value = random.randint(1, 20)
     return msg
 
 async def setup_service_discovery():
@@ -43,11 +43,13 @@ async def setup_server_service(service_discovery):
         engineservice,
         instance_id=sample_instance_id,
         endpoint=(ipaddress.IPv4Address(interface_ip), 3001),
-        ttl=5,
+        ttl=255,
         sd_sender=service_discovery,
-        cyclic_offer_delay_ms=2000,
+        cyclic_offer_delay_ms=1000,
         protocol=TransportLayerProtocol.UDP,
     )
+
+
 
     service_instance.start_offer()
     service_discovery.attach(service_instance)
@@ -58,10 +60,10 @@ async def main_send():
     set_someipy_log_level(logging.DEBUG)
     service_discovery = await setup_service_discovery()
     service_instance = await setup_server_service(service_discovery)
-    msg = CurrentModeMsg()
+    msg = CurrentModeOut()
     try:
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
             engine_msg = create_engine_message(msg)
             payload = engine_msg.serialize()
             service_instance.send_event(

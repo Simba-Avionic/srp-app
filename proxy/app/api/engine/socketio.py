@@ -1,25 +1,34 @@
 
-import socketio
-from flask_socketio import emit
+from socketio import AsyncServer
 from proxy.app.parser.services.engineservice import EngineServiceManager
 
 namespace = '/engine'
 
-def register_socketio_handlers(socketio):
-    @socketio.on('connect', namespace=namespace)
-    def connect():
-        emit('connected', {"message": "Connected to engine namespace"})
+def register_engine_socketio(sio: AsyncServer):
+    @sio.on('connect', namespace=namespace)
+    async def connect(sid, environ):
+        await sio.emit('connected', 
+                      {"message": "Connected to engine namespace"},
+                      room=sid,
+                      namespace=namespace)
 
-    @socketio.on('disconnect', namespace=namespace)
-    def disconnect():
-        print("Client disconnected from engine namespace")
+    @sio.on('disconnect', namespace=namespace)
+    async def disconnect(sid):
+        print(f"Client {sid} disconnected from engine namespace")
 
     
-@socketio.on('callback_currentmode_msg', namespace=namespace)
-def callback_currentmode_msg(message):
-    try:
-        response = manager.callback_currentmode_msg(message)
-        emit('event_response', {"event_name": 'callback_currentmode_msg', "response": response})
-    except Exception as e:
-        emit('event_error', {"error": str(e)})
-
+    @sio.on('currentmode', namespace=namespace)
+    async def get_currentmode(sid, data):
+        try:
+            manager = EngineServiceManager()
+            response = manager.get_currentmode()
+            await sio.emit('currentmode', 
+                          {'event_name': 'currentmode', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    

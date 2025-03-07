@@ -12,9 +12,9 @@ from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeO
 
 SD_MULTICAST_GROUP = "224.224.224.245"
 SD_PORT = 30490
-interface_ip = "127.0.0.2"
+interface_ip = "127.0.0.8"
 SAMPLE_SERVICE_ID = 518
-SAMPLE_INSTANCE_ID = 2
+SAMPLE_INSTANCE_ID = 1
 SAMPLE_METHOD_ID = 2
 
 
@@ -28,6 +28,7 @@ async def method_handler(input_data: bytes, addr: Tuple[str, int]) -> MethodResu
     try:
         in_data = SetModeIn()
         in_data.deserialize(input_data)
+        print(in_data.data)
     except Exception as e:
         print(f"Error during deserialization: {e}")
         result.message_type = MessageType.RESPONSE
