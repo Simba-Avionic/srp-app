@@ -69,7 +69,7 @@ Step 3: Inside app.py import all generated: routers, socketio registers and init
 *NAME THE ROUTER*  
 *from proxy.app.services.engineservice import initialize\_engineservice*
 
-	Step 4: Include new routers as in:  
+Step 4: Include new routers as in:  
 app.include\_router(engine\_router)
 
 Step 5: Register socketio namespaces as in:  
