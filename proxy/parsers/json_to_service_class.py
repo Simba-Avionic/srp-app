@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, Any
 
 from proxy.app import settings
@@ -85,8 +86,11 @@ class {service_name}Manager:
         {service_name.lower()} = (
             ServiceBuilder()
             .with_service_id({service_config['service_id']})
-            .with_major_version({service_config['major_version']})
-            .with_eventgroup(event_group)"""
+            .with_major_version({service_config['major_version']})"""
+
+        if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
+            service_code += f".with_eventgroup(event_group)"
+
         service_code += f"""
             .build()
         )
@@ -99,15 +103,23 @@ class {service_name}Manager:
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
         )
-        self.service_discovery.attach(self.instance)
+        self.service_discovery.attach(self.instance)"""
+
+        if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
+            service_code += f"""
         self.instance.register_callback(self.event_callback)
-        self.instance.subscribe_eventgroup(event_group.id)
+        self.instance.subscribe_eventgroup(event_group.id)"""
+
+        service_code+="""
         self.service_discovery.attach(self.instance)
-"""
+        """
+
+
         increment_port()
 
     # event callback
-    service_code += f"""
+    if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
+        service_code += f"""
     def event_callback(self, someip_message: SomeIpMessage) -> None:
         match someip_message.header.method_id:"""
 
@@ -181,6 +193,22 @@ def process_service_json(input_json_path: str):
     parsed_config = load_json(input_json_path)
     generate_service_code(parsed_config)
 
+# for single files
+# input_json_path = 'sample_input/engine_service.json'
+#process_service_json(input_json_path)
 
-input_json_path = 'sample_input/engine_service.json'
-process_service_json(input_json_path)
+def process_multiple_services_json(input_json_path: str, output_dir: str):
+    for root, dirs, files in os.walk(input_json_path):
+        for file in files:
+            if file.endswith('.json'):
+                json_file_path = os.path.join(root, file)
+                print(f"Processing {json_file_path}...")
+
+                parsed_config = load_json(json_file_path)
+
+                generate_service_code(parsed_config)
+
+
+
+input_json_path = '../../system_definition/someip'
+process_multiple_services_json(input_json_path, '../app/services/')

@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, Any, Set
 
 def parse_type(data_type: str) -> str:
@@ -148,7 +149,27 @@ def save_code(file_path: str, code: str):
         file.write(code)
 
 
-json_input = load_json("sample_input/engine_service.json")
-generated_code, name = generate_code(json_input)
+# for single files
+# json_input = load_json("../../system_definition/someip/")
+# generated_code, name = generate_code(json_input)
+# save_code(f"../app/dataclasses/{name.lower()}_dataclass.py", generated_code)
 
-save_code(f"../app/dataclasses/{name.lower()}_dataclass.py", generated_code)
+
+def process_directory(directory_path: str):
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+            if file.endswith('.json'):
+                json_file_path = os.path.join(root, file)
+                print(f"Processing {json_file_path}...")
+                json_data = load_json(json_file_path)
+
+                generated_code, name = generate_code(json_data)
+
+                output_file_path = f"../app/dataclasses/{name.lower()}_dataclass.py"
+
+                save_code(output_file_path, generated_code)
+
+                print(f"Saved generated code to {output_file_path}")
+
+
+process_directory("../../system_definition/someip/")
