@@ -11,11 +11,11 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_1Out
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_2Out
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newTempEvent_3Out
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newPressEventOut
-from proxy.app.parser.custom_dataclasses.envservice_dataclass import newDPressEventOut
+from proxy.app.dataclasses.envservice_dataclass import newTempEvent_1Out
+from proxy.app.dataclasses.envservice_dataclass import newTempEvent_2Out
+from proxy.app.dataclasses.envservice_dataclass import newTempEvent_3Out
+from proxy.app.dataclasses.envservice_dataclass import newPressEventOut
+from proxy.app.dataclasses.envservice_dataclass import newDPressEventOut
 
 class EnvServiceManager:
     __instance = None
@@ -60,7 +60,7 @@ class EnvServiceManager:
         self.instance = await construct_client_service_instance(
             service=envservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10189),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10192),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

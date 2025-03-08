@@ -1,8 +1,8 @@
 
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import (StartOut, SetModeOut)
-from proxy.app.parser.services.engineservice import EngineServiceManager
+from proxy.app.dataclasses.engineservice_dataclass import (SetModeOut, StartOut)
+from proxy.app.services.engineservice import EngineServiceManager
 from api.common import process_method_result
 
 router = APIRouter(

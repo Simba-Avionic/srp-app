@@ -1,6 +1,5 @@
 import json
 from typing import Dict, Any, Set
-from dataclasses import dataclass
 
 def parse_type(data_type: str) -> str:
     type_mapping = {
@@ -152,4 +151,4 @@ def save_code(file_path: str, code: str):
 json_input = load_json("sample_input/engine_service.json")
 generated_code, name = generate_code(json_input)
 
-save_code(f"custom_dataclasses/{name.lower()}_dataclass.py", generated_code)
+save_code(f"../app/dataclasses/{name.lower()}_dataclass.py", generated_code)

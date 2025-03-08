@@ -1,9 +1,9 @@
 import os
 
-from proxy.app.parser.services.engineservice import EngineServiceManager
-from proxy.app.parser.services.envservice import EnvServiceManager
+from proxy.app.services.engineservice import EngineServiceManager
+from proxy.app.services.envservice import EnvServiceManager
 
-API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../api")
+API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
 
 def create_api_directory(manager_name):
@@ -33,15 +33,15 @@ def generate_router_code(manager_name, manager):
     imports_code = f"""
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
-from proxy.app.parser.custom_dataclasses.{manager_name}service_dataclass import ("""
+from proxy.app.dataclasses.{manager_name}service_dataclass import ("""
 
     if deserialization_classes:
         imports_code += ", ".join(deserialization_classes) + ")\n"
     else:
         imports_code = ""
 
-    imports_code += f"from proxy.app.parser.services.{manager_name}service import {type(manager).__name__}\n"
-    imports_code += "from proxy.app.api.common import process_method_result\n\n"
+    imports_code += f"from proxy.app.services.{manager_name}service import {type(manager).__name__}\n"
+    imports_code += "from `api.common import process_method_result\n\n"
 
     methods_code = ""
     for method_name in valid_methods:
@@ -97,7 +97,7 @@ def generate_socketio_code(manager_name, manager):
 
     return f"""
 from socketio import AsyncServer
-from proxy.app.parser.services.{manager_name}service import {type(manager).__name__}
+from proxy.app.services.{manager_name}service import {type(manager).__name__}
 
 namespace = '/{manager_name}'
 
@@ -136,5 +136,5 @@ def generate_service_code(manager_name, manager):
 
 
 if __name__ == "__main__":
-    manager = EngineServiceManager()
-    generate_service_code("engine", manager)
+    manager = EnvServiceManager()
+    generate_service_code("env", manager)

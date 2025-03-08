@@ -5,8 +5,8 @@ import os
 from fastapi import BackgroundTasks, APIRouter
 from datetime import datetime
 
-from proxy.app.parser.services.engineservice import EngineServiceManager
-from proxy.app.parser.services.envservice import EnvServiceManager
+from proxy.app.services.engineservice import EngineServiceManager
+from proxy.app.services.envservice import EnvServiceManager
 
 current_dir = os.getcwd()
 

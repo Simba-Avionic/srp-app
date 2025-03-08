@@ -11,9 +11,9 @@ from api.engine.socketio import register_engine_socketio
 from api.env.socketio import register_env_socketio
 from api.engine.router import router as engine_router
 from api.save_to_file.router import save_router
-from proxy.app.parser.services.engineservice import initialize_engineservice
-from proxy.app.parser.services.envservice import initialize_envservice
-from proxy.app.parser.services.service_discovery import initialize_service_discovery
+from proxy.app.services.engineservice import initialize_engineservice
+from proxy.app.services.envservice import initialize_envservice
+from proxy.app.services.service_discovery import initialize_service_discovery
 
 sio = AsyncServer(async_mode='asgi', logger=True, engineio_logger=True)
 app = FastAPI()

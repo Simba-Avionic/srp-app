@@ -34,10 +34,10 @@ from proxy.app.settings import INTERFACE_IP
 
     for service_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
-            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {event_name}Out\n"
+            service_code += f"from proxy.app.dataclasses.{service_name.lower()}_dataclass import {event_name}Out\n"
 
         for method_name in service_config.get('methods', {}).keys():
-            service_code += f"from proxy.app.parser.custom_dataclasses.{service_name.lower()}_dataclass import {method_name}In\n"
+            service_code += f"from proxy.app.dataclasses.{service_name.lower()}_dataclass import {method_name}In\n"
 
     service_code += f"""
 class {service_name}Manager:
@@ -173,7 +173,7 @@ async def initialize_{service_name.lower()}(sd):
 
 """
 
-    save_code(f'services/{service_name.lower()}.py', service_code)
+    save_code(f'../app/services/{service_name.lower()}.py', service_code)
     return service_code
 
 
@@ -182,5 +182,5 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 
-input_json_path = 'sample_input/env_service.json'
+input_json_path = 'sample_input/engine_service.json'
 process_service_json(input_json_path)

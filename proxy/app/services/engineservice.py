@@ -11,9 +11,9 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import CurrentModeOut
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import StartIn
-from proxy.app.parser.custom_dataclasses.engineservice_dataclass import SetModeIn
+from proxy.app.dataclasses.engineservice_dataclass import CurrentModeOut
+from proxy.app.dataclasses.engineservice_dataclass import StartIn
+from proxy.app.dataclasses.engineservice_dataclass import SetModeIn
 
 class EngineServiceManager:
     __instance = None
@@ -29,7 +29,6 @@ class EngineServiceManager:
             self.initialized = False
             self.instance = None
             self.currentmode = None
-    
 
     async def find_service(self):
         while not self.instance.service_found():
@@ -55,7 +54,7 @@ class EngineServiceManager:
         self.instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10184),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10197),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

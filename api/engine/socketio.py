@@ -1,6 +1,6 @@
 
 from socketio import AsyncServer
-from proxy.app.parser.services.engineservice import EngineServiceManager
+from proxy.app.services.engineservice import EngineServiceManager
 
 namespace = '/engine'
 

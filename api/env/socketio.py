@@ -1,6 +1,6 @@
 
 from socketio import AsyncServer
-from proxy.app.parser.services.envservice import EnvServiceManager
+from proxy.app.services.envservice import EnvServiceManager
 
 namespace = '/env'
 
