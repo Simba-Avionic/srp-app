@@ -1,7 +1,0 @@
-git+https://github.com/Simba-Avionic/someipy.git
-fastapi
-socketio
-asyncio
-logging
-contextlib
-typing
