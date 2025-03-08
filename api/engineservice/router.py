@@ -6,8 +6,8 @@ from proxy.app.services.engineservice import EngineServiceManager
 from api.common import process_method_result
 
 router = APIRouter(
-    prefix="/engine",
-    tags=["engine"]
+    prefix="/engineservice",
+    tags=["engineservice"]
 )
 
 

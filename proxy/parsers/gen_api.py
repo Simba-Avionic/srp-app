@@ -1,7 +1,9 @@
 import os
 
 from proxy.app.services.engineservice import EngineServiceManager
-from proxy.app.services.envservice import EnvServiceManager
+from proxy.app.services.envapp import EnvAppManager
+from proxy.app.services.servoservice import ServoServiceManager
+from proxy.app.services.fileloggerapp import FileLoggerAppManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -33,15 +35,15 @@ def generate_router_code(manager_name, manager):
     imports_code = f"""
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
-from proxy.app.dataclasses.{manager_name}service_dataclass import ("""
+from proxy.app.dataclasses.{manager_name}_dataclass import ("""
 
     if deserialization_classes:
         imports_code += ", ".join(deserialization_classes) + ")\n"
     else:
         imports_code = ""
 
-    imports_code += f"from proxy.app.services.{manager_name}service import {type(manager).__name__}\n"
-    imports_code += "from `api.common import process_method_result\n\n"
+    imports_code += f"from proxy.app.services.{manager_name} import {type(manager).__name__}\n"
+    imports_code += "from api.common import process_method_result\n\n"
 
     methods_code = ""
     for method_name in valid_methods:
@@ -97,7 +99,7 @@ def generate_socketio_code(manager_name, manager):
 
     return f"""
 from socketio import AsyncServer
-from proxy.app.services.{manager_name}service import {type(manager).__name__}
+from proxy.app.services.{manager_name} import {type(manager).__name__}
 
 namespace = '/{manager_name}'
 
@@ -129,12 +131,13 @@ def write_code_to_files(manager_name, router_code, socketio_code):
         f.write(socketio_code)
 
 
-def generate_service_code(manager_name, manager):
+def generate_service_code(manager):
+    manager_name = type(manager).__name__.replace("Manager", "").lower()
     router_code = generate_router_code(manager_name, manager)
     socketio_code = generate_socketio_code(manager_name, manager)
     write_code_to_files(manager_name, router_code, socketio_code)
 
 
 if __name__ == "__main__":
-    manager = EnvServiceManager()
-    generate_service_code("env", manager)
+    manager = FileLoggerAppManager()
+    generate_service_code(manager)

@@ -2,19 +2,19 @@
 from socketio import AsyncServer
 from proxy.app.services.engineservice import EngineServiceManager
 
-namespace = '/engine'
+namespace = '/engineservice'
 
-def register_engine_socketio(sio: AsyncServer):
+def register_engineservice_socketio(sio: AsyncServer):
     @sio.on('connect', namespace=namespace)
     async def connect(sid, environ):
         await sio.emit('connected', 
-                      {"message": "Connected to engine namespace"},
+                      {"message": "Connected to engineservice namespace"},
                       room=sid,
                       namespace=namespace)
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {sid} disconnected from engine namespace")
+        print(f"Client {sid} disconnected from engineservice namespace")
 
     
     @sio.on('currentmode', namespace=namespace)
