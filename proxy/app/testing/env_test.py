@@ -12,7 +12,7 @@ from someipy import (
 from someipy.logging import set_someipy_log_level
 from someipy.service_discovery import construct_service_discovery
 
-from proxy.app.dataclasses.envservice_dataclass import newTempEvent_1Out
+from proxy.app.dataclasses.envapp_dataclass import newTempEvent_1Out
 
 sd_multicast_group = "224.224.224.245"
 sd_port = 30490

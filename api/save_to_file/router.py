@@ -6,7 +6,7 @@ from fastapi import BackgroundTasks, APIRouter
 from datetime import datetime
 
 from proxy.app.services.engineservice import EngineServiceManager
-from proxy.app.services.envservice import EnvServiceManager
+from proxy.app.services.envapp import EnvAppManager
 
 current_dir = os.getcwd()
 
@@ -16,7 +16,7 @@ csv_filename = os.path.abspath(csv_filename)
 
 csv_lock = asyncio.Lock()
 
-managers = [EngineServiceManager(), EnvServiceManager()]
+managers = [EngineServiceManager(), EnvAppManager()]
 
 
 def generate_header():

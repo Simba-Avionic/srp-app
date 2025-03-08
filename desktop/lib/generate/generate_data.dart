@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 void main() async {
-  String filePath = 'engine_service.json';
+  String filePath = ''; //pass here path, absolute path preferable
 
   File file = File(filePath);
   String jsonData = await file.readAsString();
@@ -20,7 +20,7 @@ void main() async {
     "serviceId": serviceId,
   };
 
-  if (methods.isNotEmpty) {
+  if (methods != null && methods.isNotEmpty) {
     serviceData["methods"] = methods.entries.map((entry) {
       return {
         "name": entry.key,
@@ -30,7 +30,7 @@ void main() async {
     }).toList();
   }
 
-  if (events.isNotEmpty) {
+  if (events != null && events.isNotEmpty) {
     serviceData["events"] = events.entries.map((entry) {
       return {
         "name": entry.key,

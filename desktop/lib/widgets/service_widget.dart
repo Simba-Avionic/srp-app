@@ -19,7 +19,6 @@ class ServiceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String namespace = serviceName
-        .replaceAll(RegExp(r'service$', caseSensitive: false), '')
         .toLowerCase()
         .trim();
     return Container(
@@ -59,7 +58,7 @@ class ServiceWidget extends StatelessWidget {
                       methodName: method['name'],
                       methodId: method['id'],
                       inType: method['in_type'],
-                      namespace: 'engine',
+                      namespace: namespace,
                     ),
                   );
                 },
