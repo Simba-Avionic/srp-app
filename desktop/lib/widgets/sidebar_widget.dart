@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:desktop/main.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 
@@ -41,12 +42,7 @@ class Sidebar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.home, color: Colors.white, size: 35),
             title: const Text('Home', style: TextStyle(color: Colors.white, fontSize: 24)),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const Home()),
-              );
-            },
+            onTap: () {},
           ),
           const SizedBox(height: 10),
           ListTile(
