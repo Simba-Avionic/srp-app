@@ -3,7 +3,7 @@ import os
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
 from proxy.app.services.servoservice import ServoServiceManager
-from proxy.app.services.fileloggerapp import FileLoggerAppManager
+from proxy.app.services.primerservice import PrimerServiceManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -139,5 +139,5 @@ def generate_service_code(manager):
 
 
 if __name__ == "__main__":
-    manager = FileLoggerAppManager()
+    manager = PrimerServiceManager()
     generate_service_code(manager)

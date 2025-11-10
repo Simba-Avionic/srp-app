@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xFF1F2937),
-        secondaryHeaderColor: Color(0xFF004D40),
+        secondaryHeaderColor: const Color(0xFF004D40),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF1F2937),
           secondary: Colors.blue,
@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
-        child: Row(
+        child: const Row(
           children: const [
             SizedBox(
               width: 250,

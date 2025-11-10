@@ -28,6 +28,10 @@ from api.servoservice.router import router as servo_router
 from api.servoservice.socketio import register_servoservice_socketio
 from proxy.app.services.servoservice import initialize_servoservice
 
+#primerservice
+from api.primerservice.router import router as primer_router
+from api.primerservice.socketio import register_primerservice_socketio
+from proxy.app.services.primerservice import initialize_primerservice
 
 
 sio = AsyncServer(async_mode='asgi', logger=True, engineio_logger=True)
@@ -40,10 +44,12 @@ app.include_router(engine_router)
 app.include_router(save_router)
 app.include_router(servo_router)
 app.include_router(filelogger_router)
+app.include_router(primer_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
 register_envapp_socketio(sio)
+register_primerservice_socketio(sio)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -55,7 +61,9 @@ async def lifespan(app: FastAPI):
 
     asyncio.create_task(run_engine_service_manager(sd_instance))
     asyncio.create_task(run_env_service_manager(sd_instance))
-
+    asyncio.create_task(run_servo_service_manager(sd_instance))
+    asyncio.create_task(run_fileloggerapp_manager(sd_instance))
+    asyncio.create_task(run_primerservice_manager(sd_instance))
 
     yield
 
@@ -67,7 +75,6 @@ app.router.lifespan_context = lifespan
 async def run_engine_service_manager(sd):
     await initialize_engineservice(sd)
 
-
 async def run_env_service_manager(sd):
     await initialize_envapp(sd)
 
@@ -76,6 +83,9 @@ async def run_servo_service_manager(sd):
 
 async def run_fileloggerapp_manager(sd):
     await initialize_fileloggerapp(sd)
+
+async def run_primerservice_manager(sd):
+    await initialize_primerservice(sd)
 
 
 if __name__ == '__main__':

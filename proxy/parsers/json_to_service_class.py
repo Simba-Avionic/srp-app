@@ -12,6 +12,8 @@ def load_json(file_path: str) -> Dict[str, Any]:
 
 
 def save_code(file_path: str, code: str):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    print(file_path)
     with open(file_path, "w") as file:
         file.write(code)
 
@@ -186,6 +188,7 @@ async def initialize_{service_name.lower()}(sd):
 """
 
     save_code(f'../app/services/{service_name.lower()}.py', service_code)
+    print(service_code)
     return service_code
 
 
@@ -194,8 +197,8 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 # for single files
-# input_json_path = 'sample_input/engine_service.json'
-#process_service_json(input_json_path)
+input_json_path = '/home/krzysztof/srp-app/system_definition/someip/prim_service/service.json'
+process_service_json(input_json_path)
 
 def process_multiple_services_json(input_json_path: str, output_dir: str):
     for root, dirs, files in os.walk(input_json_path):
@@ -210,5 +213,5 @@ def process_multiple_services_json(input_json_path: str, output_dir: str):
 
 
 
-input_json_path = '../../system_definition/someip'
-process_multiple_services_json(input_json_path, '../app/services/')
+# input_json_path = '../../system_definition/someip'
+# process_multiple_services_json(input_json_path, '../app/services/')
