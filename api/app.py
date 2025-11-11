@@ -1,11 +1,61 @@
 import logging
 import asyncio
 from contextlib import asynccontextmanager
+import sys
+import os
+from loguru import logger as loguru_logger
+
+# Dodaj folder nadrzędny do ścieżki
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from fastapi import FastAPI
 from socketio import AsyncServer
 from socketio import ASGIApp
 from someipy.logging import set_someipy_log_level
+from fastapi.middleware.cors import CORSMiddleware
+
+# Configure Loguru rotating, compressed file logs (INFO+)
+os.makedirs(os.path.join(os.path.dirname(__file__), "..", "logs"), exist_ok=True)
+logs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "logs", "app_{time}.log"))
+loguru_logger.remove()
+loguru_logger.add(
+    logs_path,
+    rotation="2 GB",
+    compression="zip",
+    level="INFO",
+    enqueue=True,
+    backtrace=True,
+    diagnose=False
+)
+
+# Bridge std logging (our modules) to Loguru
+class _LoguruHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            level = record.levelname
+            log = loguru_logger.bind(logger_name=record.name)
+            log.log(level, record.getMessage())
+        except Exception:
+            pass
+
+root_logger = logging.getLogger()
+root_logger.handlers = [ _LoguruHandler() ]
+root_logger.setLevel(logging.INFO)
+
+# Quiet down verbose third-party loggers and pass them explicitly to AsyncServer
+socketio_logger = logging.getLogger("socketio")
+socketio_logger.setLevel(logging.WARNING)
+engineio_logger = logging.getLogger("engineio")
+engineio_logger.setLevel(logging.WARNING)
+
+# Set someipy loggers to INFO (suppress DEBUG spam)
+for _name in [
+    "someipy",
+    "someipy.client_service_instance",
+    "someipy.service_discovery",
+    "someipy.server_service_instance",
+]:
+    logging.getLogger(_name).setLevel(logging.INFO)
 
 from api.save_to_file.router import save_router
 from proxy.app.services.service_discovery import initialize_service_discovery
@@ -34,8 +84,22 @@ from api.primerservice.socketio import register_primerservice_socketio
 from proxy.app.services.primerservice import initialize_primerservice
 
 
-sio = AsyncServer(async_mode='asgi', logger=True, engineio_logger=True)
+sio = AsyncServer(
+    async_mode='asgi',
+    logger=socketio_logger,
+    engineio_logger=engineio_logger,
+    cors_allowed_origins="*"
+)
 app = FastAPI()
+
+# CORS for REST and preflight (dev: allow all; tighten in prod)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 asgi_app = ASGIApp(sio, other_asgi_app=app)
 
 
@@ -51,21 +115,47 @@ register_engineservice_socketio(sio)
 register_envapp_socketio(sio)
 register_primerservice_socketio(sio)
 
+@app.middleware("http")
+async def log_requests(request, call_next):
+    from time import perf_counter
+    start = perf_counter()
+    response = await call_next(request)
+    duration_ms = (perf_counter() - start) * 1000
+    # Use std logging which is bridged to loguru
+    logging.getLogger("api.request").info(
+        "%s %s -> %s in %.2f ms",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms
+    )
+    return response
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Async application lifespan management"""
     global sd_instance
 
     sd_instance = await initialize_service_discovery()
-    set_someipy_log_level(logging.DEBUG)
+    set_someipy_log_level(logging.INFO)
 
-    asyncio.create_task(run_engine_service_manager(sd_instance))
-    asyncio.create_task(run_env_service_manager(sd_instance))
-    asyncio.create_task(run_servo_service_manager(sd_instance))
-    asyncio.create_task(run_fileloggerapp_manager(sd_instance))
-    asyncio.create_task(run_primerservice_manager(sd_instance))
+    engine_task = asyncio.create_task(run_engine_service_manager(sd_instance))
+    env_task = asyncio.create_task(run_env_service_manager(sd_instance))
+    servo_task = asyncio.create_task(run_servo_service_manager(sd_instance))
+    filelogger_task = asyncio.create_task(run_fileloggerapp_manager(sd_instance))
+    primer_task = asyncio.create_task(run_primerservice_manager(sd_instance))
+
 
     yield
+
+    # graceful shutdown
+    for t in (engine_task, env_task, servo_task, filelogger_task):
+        t.cancel()
+    for t in (engine_task, env_task, servo_task, filelogger_task):
+        try:
+            await t
+        except asyncio.CancelledError:
+            pass
 
     await sd_instance.shutdown()
 
