@@ -1,5 +1,6 @@
 
 from socketio import AsyncServer
+from loguru import logger
 from proxy.app.services.engineservice import EngineServiceManager
 
 namespace = '/engineservice'
@@ -14,7 +15,7 @@ def register_engineservice_socketio(sio: AsyncServer):
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {sid} disconnected from engineservice namespace")
+        logger.info("Client %s disconnected from engineservice namespace", sid)
 
     
     @sio.on('currentmode', namespace=namespace)
@@ -27,6 +28,7 @@ def register_engineservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
+            logger.exception("Error handling currentmode: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

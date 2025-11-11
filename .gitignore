@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+*.log
+*.logs
+
+.venv
+.venv/*
+__pycache__
+__pycache__/*
+desktop/build
+desktop/build/*
+desktop/linux
+desktop/linux/*
+desktop/android
+desktop/android/*

@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
+from loguru import logger
 from proxy.app.dataclasses.servoservice_dataclass import (ReadMainServoValueOut, SetMainServoValueOut, ReadVentServoValueOut, SetVentServoValueOut)
 from proxy.app.services.servoservice import ServoServiceManager
 from api.common import process_method_result
@@ -10,15 +11,16 @@ router = APIRouter(
     tags=["servoservice"]
 )
 
-
 @router.post("/readmainservovalue")
 async def readmainservovalue(data: dict = Body(...)):
     try:
+        logger.info("servoservice.readmainservovalue called with body: {}", data)
         service_manager = ServoServiceManager()
         params = data or {}
         method_result = await service_manager.ReadMainServoValue(**params)
         return process_method_result(method_result, deserialization_class=ReadMainServoValueOut)
     except Exception as e:
+        logger.exception("Error in readmainservovalue handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

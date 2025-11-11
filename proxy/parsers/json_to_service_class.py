@@ -139,7 +139,7 @@ class {service_name}Manager:
     service_code += """
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 """
     # getter for event state
     for service_name, service_config in services.items():

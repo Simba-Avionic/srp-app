@@ -2,6 +2,7 @@
 
 import ipaddress
 import asyncio
+from loguru import logger
 
 from someipy import (
     construct_client_service_instance,
@@ -32,7 +33,7 @@ class EngineServiceManager:
 
     async def find_service(self):
         while not self.instance.service_found():
-            print("Waiting for service")
+            logger.info("Waiting for service")
             await asyncio.sleep(0.5)
 
     def assign_service_discovery(self, new_sd):
@@ -70,11 +71,11 @@ class EngineServiceManager:
                     CurrentMode_msg = CurrentModeOut().deserialize(someip_message.payload)
                     self.currentmode = CurrentMode_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 
     def get_currentmode(self):
         return self.currentmode
@@ -104,7 +105,7 @@ async def initialize_engineservice(sd):
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
 
