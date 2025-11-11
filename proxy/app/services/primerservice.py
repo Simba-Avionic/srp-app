@@ -2,6 +2,7 @@
 
 import ipaddress
 import asyncio
+from loguru import logger
 
 from someipy import (
     construct_client_service_instance,
@@ -32,9 +33,12 @@ class PrimerServiceManager:
             self.primestatusevent = None
 
     async def find_service(self):
-        while not self.instance.service_found():
-            print("Waiting for service")
-            await asyncio.sleep(0.5)
+        try:
+            while not self.instance or not self.instance.service_found():
+                logger.debug("Waiting for service")
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            return
 
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
@@ -71,11 +75,11 @@ class PrimerServiceManager:
                     primeStatusEvent_msg = primeStatusEventOut().deserialize(someip_message.payload)
                     self.primestatusevent = primeStatusEvent_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
 
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 
     def get_primestatusevent(self):
         return self.primestatusevent
@@ -111,7 +115,7 @@ async def initialize_primerservice(sd):
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
 

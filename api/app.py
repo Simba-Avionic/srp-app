@@ -149,9 +149,9 @@ async def lifespan(app: FastAPI):
     yield
 
     # graceful shutdown
-    for t in (engine_task, env_task, servo_task, filelogger_task):
+    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
         t.cancel()
-    for t in (engine_task, env_task, servo_task, filelogger_task):
+    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
         try:
             await t
         except asyncio.CancelledError:

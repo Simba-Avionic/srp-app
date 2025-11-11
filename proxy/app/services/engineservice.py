@@ -32,9 +32,13 @@ class EngineServiceManager:
             self.currentmode = None
 
     async def find_service(self):
-        while not self.instance.service_found():
-            logger.info("Waiting for service")
-            await asyncio.sleep(0.5)
+        try:
+            while not self.instance or not self.instance.service_found():
+                logger.debug("Waiting for service")
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            # Graceful task cancellation during shutdown
+            return
 
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
