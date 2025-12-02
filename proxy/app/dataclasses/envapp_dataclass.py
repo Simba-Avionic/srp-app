@@ -3,7 +3,7 @@ from someipy.serialization import (
     SomeIpPayload,
     Sint16
 )
-
+from loguru import logger
 
 @dataclass
 class newTempEvent_1In(SomeIpPayload):
@@ -20,7 +20,6 @@ class newTempEvent_1Out(SomeIpPayload):
 
     def __init__(self):
         self.data = Sint16()
-
     def from_json(self, json_argument):
          self.data.value = int(json_argument)
 

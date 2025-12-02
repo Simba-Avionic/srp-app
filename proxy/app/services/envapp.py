@@ -9,7 +9,7 @@ from someipy import (
     TransportLayerProtocol,
     ServiceBuilder, 
     SomeIpMessage,
-    EventGroup
+    EventGroup,
 )
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.envapp_dataclass import newTempEvent_1Out
@@ -17,6 +17,22 @@ from proxy.app.dataclasses.envapp_dataclass import newTempEvent_2Out
 from proxy.app.dataclasses.envapp_dataclass import newTempEvent_3Out
 from proxy.app.dataclasses.envapp_dataclass import newPressEventOut
 from proxy.app.dataclasses.envapp_dataclass import newDPressEventOut
+
+
+def _to_little_endian_int16(value: int) -> int:
+    """
+    Konwersja wartosci int16 sparsowanej jako BIG ENDIAN
+    na prawidlowe LITTLE ENDIAN.
+    """
+    # upewniamy sie, ze miescimy sie w zakresie int16
+    if value is None:
+        return None
+    # zamiana kolejnosci bajtow z big -> little i ponowne odczytanie jako signed
+    return int.from_bytes(
+        value.to_bytes(2, byteorder="big", signed=True),
+        byteorder="little",
+        signed=True,
+    )
 
 class EnvAppManager:
     __instance = None
@@ -50,7 +66,7 @@ class EnvAppManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773]
+            id=32769, event_ids=[32769, 32770, 32771, 32772]
         )
 
         envapp = (
@@ -74,39 +90,40 @@ class EnvAppManager:
         self.service_discovery.attach(self.instance)
         
     def event_callback(self, someip_message: SomeIpMessage) -> None:
+        print(someip_message)
         match someip_message.header.method_id:
             case 32769:
                 try:
                     newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
-                    self.newtempevent_1 = newTempEvent_1_msg.data.value
+                    self.newtempevent_1 = _to_little_endian_int16(newTempEvent_1_msg.data.value)
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
     
             case 32770:
                 try:
                     newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
-                    self.newtempevent_2 = newTempEvent_2_msg.data.value
+                    self.newtempevent_2 = _to_little_endian_int16(newTempEvent_2_msg.data.value)
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
     
             case 32771:
                 try:
                     newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
-                    self.newtempevent_3 = newTempEvent_3_msg.data.value
+                    self.newtempevent_3 = _to_little_endian_int16(newTempEvent_3_msg.data.value)
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
     
             case 32772:
                 try:
                     newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
-                    self.newpressevent = newPressEvent_msg.data.value
+                    self.newpressevent = _to_little_endian_int16(newPressEvent_msg.data.value)
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
     
             case 32773:
                 try:
                     newDPressEvent_msg = newDPressEventOut().deserialize(someip_message.payload)
-                    self.newdpressevent = newDPressEvent_msg.data.value
+                    self.newdpressevent = _to_little_endian_int16(newDPressEvent_msg.data.value)
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
     
@@ -115,6 +132,7 @@ class EnvAppManager:
             await self.instance.close()
 
     def get_newtempevent_1(self):
+        print(self.newtempevent_1)
         return self.newtempevent_1
     
     def get_newtempevent_2(self):

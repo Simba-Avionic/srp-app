@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Set
 
 from proxy.app import settings
 from proxy.app.utils import increment_port
@@ -16,6 +16,32 @@ def save_code(file_path: str, code: str):
     print(file_path)
     with open(file_path, "w") as file:
         file.write(code)
+
+
+NUMERIC_ENDIAN_TYPES = {
+    "uint8":  (1, False),
+    "int8":   (1, True),
+    "uint16": (2, False),
+    "int16":  (2, True),
+    "uint32": (4, False),
+    "int32":  (4, True),
+    "uint64": (8, False),
+    "int64":  (8, True),
+}
+
+
+def _collect_event_out_types(services: Dict[str, Any]) -> Set[str]:
+    """Zbiera typy danych z pola 'out' eventów, aby wygenerować pomocnicze funkcje endianness."""
+    types: Set[str] = set()
+    for _service_name, service_config in services.items():
+        for _event_name, event_config in service_config.get("events", {}).items():
+            out_cfg = event_config.get("data_structure", {}).get("out")
+            if not out_cfg:
+                continue
+            t = out_cfg.get("type")
+            if t in NUMERIC_ENDIAN_TYPES:
+                types.add(t)
+    return types
 
 
 def generate_service_code(parsed_config, ttl=5):
@@ -34,6 +60,32 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
+"""
+
+    # Dodaj pomocnicze funkcje do konwersji big endian -> little endian
+    used_types = _collect_event_out_types(services)
+    if used_types:
+        service_code += "\n"
+        for t in sorted(used_types):
+            size, signed = NUMERIC_ENDIAN_TYPES[t]
+            # dla 1‑bajtowych typów endianness nie ma znaczenia – zwracamy wartość bez zmian
+            if size == 1:
+                service_code += f"""
+def _to_little_endian_{t}(value: int) -> int:
+    \"\"\"Konwersja typu {t}; dla 1 bajtu endianness jest bez znaczenia.\"\"\"
+    return value
+"""
+            else:
+                service_code += f"""
+def _to_little_endian_{t}(value: int) -> int:
+    \"\"\"Konwersja wartosci {t} sparsowanej jako BIG ENDIAN na LITTLE ENDIAN.\"\"\"
+    if value is None:
+        return None
+    return int.from_bytes(
+        value.to_bytes({size}, byteorder="big", signed={str(signed)}),
+        byteorder="little",
+        signed={str(signed)},
+    )
 """
 
     for service_name, service_config in services.items():
@@ -131,13 +183,25 @@ class {service_name}Manager:
 
     for service_name, service_config in services.items():
         for event_name, event_config in service_config.get('events', {}).items():
+            # Ustalenie typu 'out' eventu w celu dobrania odpowiedniej funkcji endianness
+            out_cfg = event_config.get('data_structure', {}).get('out', {})
+            out_type = out_cfg.get('type')
+            endian_helper = None
+            if out_type in NUMERIC_ENDIAN_TYPES:
+                endian_helper = f"_to_little_endian_{out_type}"
+
+            if endian_helper:
+                assign_expr = f"{endian_helper}({event_name}_msg.data.value)"
+            else:
+                assign_expr = f"{event_name}_msg.data.value"
+
             service_code += f"""
             case {event_config['id']}:
                 try:
                     {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
-                    self.{event_name.lower()} = {event_name}_msg.data.value
+                    self.{event_name.lower()} = {assign_expr}
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception("Error in deserialization: {{}}, e)
     """
 
     service_code += """
