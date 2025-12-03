@@ -9,6 +9,5 @@ with open(config_path, 'r') as file:
 
 MULTICAST_GROUP = data['MULTICAST_GROUP']
 INTERFACE_IP = data['INTERFACE_IP']
-INTERFACE_IP_FINAL = data['INTERFACE_IP_FINAL']
 SD_PORT = data['SD_PORT']
 NEXT_PORT = data['NEXT_PORT']

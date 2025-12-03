@@ -1,7 +1,9 @@
+
 from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
-    Sint16
+    Sint16,
+    Uint16
 )
 
 
@@ -79,10 +81,10 @@ class newPressEventIn(SomeIpPayload):
 
 @dataclass
 class newPressEventOut(SomeIpPayload):
-    data: Sint16
+    data: Uint16
 
     def __init__(self):
-        self.data = Sint16()
+        self.data = Uint16()
 
     def from_json(self, json_argument):
          self.data.value = int(json_argument)
@@ -100,10 +102,10 @@ class newDPressEventIn(SomeIpPayload):
 
 @dataclass
 class newDPressEventOut(SomeIpPayload):
-    data: Sint16
+    data: Uint16
 
     def __init__(self):
-        self.data = Sint16()
+        self.data = Uint16()
 
     def from_json(self, json_argument):
          self.data.value = int(json_argument)
