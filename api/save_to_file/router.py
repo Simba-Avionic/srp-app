@@ -1,6 +1,7 @@
 import csv
 import asyncio
 import os
+from loguru import logger
 
 from fastapi import BackgroundTasks, APIRouter
 from datetime import datetime
@@ -64,7 +65,7 @@ async def collect_manager_data():
                         value = getattr(manager, method_name)()
                         current_row.append(value)
             except Exception as e:
-                print(f"Error collecting data: {e}")
+                logger.exception("Error collecting data: {}", e)
 
         if current_row:
             yield current_row

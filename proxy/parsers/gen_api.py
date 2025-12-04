@@ -3,7 +3,7 @@ import os
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
 from proxy.app.services.servoservice import ServoServiceManager
-from proxy.app.services.fileloggerapp import FileLoggerAppManager
+from proxy.app.services.primerservice import PrimerServiceManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -35,6 +35,7 @@ def generate_router_code(manager_name, manager):
     imports_code = f"""
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
+from loguru import logger
 from proxy.app.dataclasses.{manager_name}_dataclass import ("""
 
     if deserialization_classes:
@@ -57,6 +58,7 @@ async def {method_name.lower()}(data: dict = Body(...)):
         method_result = await service_manager.{method_name}(**params)
         return process_method_result(method_result, deserialization_class={deserialization_class})
     except Exception as e:
+        logger.exception("Error in {method_name.lower()} handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={{"error": str(e)}}
@@ -91,6 +93,7 @@ def generate_socketio_code(manager_name, manager):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
+            logger.exception("Error handling event {event_name}: %s", e)
             await sio.emit('event_error',
                           {{'error': str(e)}},
                           room=sid,
@@ -99,6 +102,7 @@ def generate_socketio_code(manager_name, manager):
 
     return f"""
 from socketio import AsyncServer
+from loguru import logger
 from proxy.app.services.{manager_name} import {type(manager).__name__}
 
 namespace = '/{manager_name}'
@@ -113,7 +117,7 @@ def register_{manager_name}_socketio(sio: AsyncServer):
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {{sid}} disconnected from {manager_name} namespace")
+        logger.info("Client %s disconnected from {manager_name} namespace", sid)
 
     {handlers_code}
 """
@@ -139,5 +143,5 @@ def generate_service_code(manager):
 
 
 if __name__ == "__main__":
-    manager = FileLoggerAppManager()
+    manager = PrimerServiceManager()
     generate_service_code(manager)

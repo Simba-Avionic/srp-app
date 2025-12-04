@@ -12,6 +12,8 @@ def load_json(file_path: str) -> Dict[str, Any]:
 
 
 def save_code(file_path: str, code: str):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    print(file_path)
     with open(file_path, "w") as file:
         file.write(code)
 
@@ -22,6 +24,7 @@ def generate_service_code(parsed_config, ttl=5):
 
 import ipaddress
 import asyncio
+from loguru import logger
 
 from someipy import (
     construct_client_service_instance,
@@ -62,9 +65,12 @@ class {service_name}Manager:
     service_code += f"""
 
     async def find_service(self):
-        while not self.instance.service_found():
-            print("Waiting for service")
-            await asyncio.sleep(0.5)
+        try:
+            while not self.instance or not self.instance.service_found():
+                logger.debug("Waiting for service")
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            return
 
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
@@ -131,13 +137,13 @@ class {service_name}Manager:
                     {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
                     self.{event_name.lower()} = {event_name}_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {{e}}")
+                    logger.exception("Error in deserialization: {}", e)
     """
 
     service_code += """
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 """
     # getter for event state
     for service_name, service_config in services.items():
@@ -179,13 +185,14 @@ async def initialize_{service_name.lower()}(sd):
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
 
 """
 
     save_code(f'../app/services/{service_name.lower()}.py', service_code)
+    print(service_code)
     return service_code
 
 
@@ -194,8 +201,8 @@ def process_service_json(input_json_path: str):
     generate_service_code(parsed_config)
 
 # for single files
-# input_json_path = 'sample_input/engine_service.json'
-#process_service_json(input_json_path)
+input_json_path = '/home/krzysztof/srp-app/system_definition/someip/prim_service/service.json'
+process_service_json(input_json_path)
 
 def process_multiple_services_json(input_json_path: str, output_dir: str):
     for root, dirs, files in os.walk(input_json_path):
@@ -210,5 +217,5 @@ def process_multiple_services_json(input_json_path: str, output_dir: str):
 
 
 
-input_json_path = '../../system_definition/someip'
-process_multiple_services_json(input_json_path, '../app/services/')
+# input_json_path = '../../system_definition/someip'
+# process_multiple_services_json(input_json_path, '../app/services/')

@@ -2,6 +2,7 @@
 
 import ipaddress
 import asyncio
+from loguru import logger
 
 from someipy import (
     construct_client_service_instance,
@@ -29,9 +30,12 @@ class FileLoggerAppManager:
             self.instance = None
 
     async def find_service(self):
-        while not self.instance.service_found():
-            print("Waiting for service")
-            await asyncio.sleep(0.5)
+        try:
+            while not self.instance or not self.instance.service_found():
+                logger.debug("Waiting for service")
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            return
 
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
@@ -58,7 +62,7 @@ class FileLoggerAppManager:
         
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 
     async def Start(self):
         await self.find_service()
@@ -83,7 +87,7 @@ async def initialize_fileloggerapp(sd):
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
 

@@ -7,24 +7,22 @@ from loguru import logger
 from someipy import (
     construct_client_service_instance,
     TransportLayerProtocol,
-    ServiceBuilder, 
+    ServiceBuilder,
     SomeIpMessage,
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.servoservice_dataclass import ServoStatusEventOut
-from proxy.app.dataclasses.servoservice_dataclass import ServoVentStatusEventOut
-from proxy.app.dataclasses.servoservice_dataclass import SetMainServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import ReadMainServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import SetVentServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import ReadVentServoValueIn
+from proxy.app.dataclasses.primerservice_dataclass import primeStatusEventOut
+from proxy.app.dataclasses.primerservice_dataclass import OnPrimeIn
+from proxy.app.dataclasses.primerservice_dataclass import OffPrimeIn
+from proxy.app.dataclasses.primerservice_dataclass import StartPrimeIn
 
-class ServoServiceManager:
+class PrimerServiceManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(ServoServiceManager, cls).__new__(cls)
+            cls.__instance = super(PrimerServiceManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -32,8 +30,7 @@ class ServoServiceManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.servostatusevent = None
-            self.servoventstatusevent = None
+            self.primestatusevent = None
 
     async def find_service(self):
         try:
@@ -46,22 +43,22 @@ class ServoServiceManager:
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
 
-    async def setup_manager(self) -> None:            
+    async def setup_manager(self) -> None:
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770]
+            id=32769, event_ids=[32769]
         )
 
-        servoservice = (
+        primerservice = (
             ServiceBuilder()
-            .with_service_id(515)
+            .with_service_id(516)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=servoservice,
+            service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10255),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10259),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -70,71 +67,49 @@ class ServoServiceManager:
         self.instance.register_callback(self.event_callback)
         self.instance.subscribe_eventgroup(event_group.id)
         self.service_discovery.attach(self.instance)
-        
+
     def event_callback(self, someip_message: SomeIpMessage) -> None:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    ServoStatusEvent_msg = ServoStatusEventOut().deserialize(someip_message.payload)
-                    self.servostatusevent = ServoStatusEvent_msg.data.value
+                    primeStatusEvent_msg = primeStatusEventOut().deserialize(someip_message.payload)
+                    self.primestatusevent = primeStatusEvent_msg.data.value
                 except Exception as e:
                     logger.exception("Error in deserialization: {}", e)
-    
-            case 32770:
-                try:
-                    ServoVentStatusEvent_msg = ServoVentStatusEventOut().deserialize(someip_message.payload)
-                    self.servoventstatusevent = ServoVentStatusEvent_msg.data.value
-                except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
-    
+
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
 
-    def get_servostatusevent(self):
-        return self.servostatusevent
-    
-    def get_servoventstatusevent(self):
-        return self.servoventstatusevent
-    
-    async def SetMainServoValue(self, setmainservovalue):
+    def get_primestatusevent(self):
+        return self.primestatusevent
+
+    async def OnPrime(self):
         await self.find_service()
-        setmainservovalue_msg = SetMainServoValueIn()
-        setmainservovalue_msg.from_json(setmainservovalue)
         method_result = await self.instance.call_method(
-            1, setmainservovalue_msg.serialize()
+            1, b''
         )
-    
+
         return method_result
-    
-    async def ReadMainServoValue(self):
+
+    async def OffPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
             2, b''
         )
-    
+
         return method_result
-    
-    async def SetVentServoValue(self, setventservovalue):
-        await self.find_service()
-        setventservovalue_msg = SetVentServoValueIn()
-        setventservovalue_msg.from_json(setventservovalue)
-        method_result = await self.instance.call_method(
-            3, setventservovalue_msg.serialize()
-        )
-    
-        return method_result
-    
-    async def ReadVentServoValue(self):
+
+    async def StartPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
-            4, b''
+            3, b''
         )
-    
+
         return method_result
-    
-async def initialize_servoservice(sd):
-    service_manager = ServoServiceManager()
+
+async def initialize_primerservice(sd):
+    service_manager = PrimerServiceManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

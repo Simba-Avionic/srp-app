@@ -2,6 +2,6 @@ git+https://github.com/Simba-Avionic/someipy.git
 fastapi
 python-socketio
 asyncio
-logging
 typing
 uvicorn
+loguru

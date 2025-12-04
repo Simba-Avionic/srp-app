@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../widgets/service_widget.dart';
 
 class Home extends StatelessWidget {
@@ -43,6 +44,19 @@ class Home extends StatelessWidget {
       ]
     };
 
+    final Map<String, dynamic> PrimerService = {
+      "serviceName": "PrimerService",
+      "serviceId": 516,
+      "methods": [
+        {"name": "OnPrime", "id": 1, "in_type": "void"},
+        {"name": "OffPrime", "id": 2, "in_type": "void"},
+        {"name": "StartPrime", "id": 3, "in_type": "void"}
+      ],
+      "events": [
+        {"name": "primeStatusEvent", "id": 32769}
+      ]
+    };
+
     final Map<String, dynamic> FileLoggerApp = {
       "serviceName": "FileLoggerApp",
       "serviceId": 517,
@@ -52,55 +66,33 @@ class Home extends StatelessWidget {
       ]
     };
 
+    final services = [
+      EnvApp,
+      ServoService,
+      FileLoggerApp,
+      PrimerService,
+      EngineService,
+    ];
 
     return Container(
       color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ServiceWidget(
-                  serviceName: EngineService['serviceName'],
-                  serviceId: EngineService['serviceId'],
-                  methods: EngineService['methods'],
-                  events: EngineService['events'],
-                ),
-
-                ServiceWidget(
-                  serviceName: EnvApp['serviceName'],
-                  serviceId: EnvApp['serviceId'],
-                  events: EnvApp['events'],
-                  methods: EnvApp['methods'],
-                ),
-                ]
-              ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ServiceWidget(
-                  serviceName: ServoService['serviceName'],
-                  serviceId: ServoService['serviceId'],
-                  events: ServoService['events'],
-                  methods: ServoService['methods'],
-                ),
-
-                ServiceWidget(
-                  serviceName: FileLoggerApp['serviceName'],
-                  serviceId: FileLoggerApp['serviceId'],
-                  events: FileLoggerApp['events'],
-                  methods: FileLoggerApp['methods'],
-                ),
-              ],
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.all(24),
+      child: MasonryGridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        itemCount: services.length,
+        itemBuilder: (context, index) {
+          final service = services[index];
+          return ServiceWidget(
+            serviceName: service['serviceName'],
+            serviceId: service['serviceId'],
+            events: service['events'],
+            methods: service['methods'],
+          );
+        },
       ),
     );
   }

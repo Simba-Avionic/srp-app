@@ -1,5 +1,6 @@
 
 from socketio import AsyncServer
+from loguru import logger
 from proxy.app.services.servoservice import ServoServiceManager
 
 namespace = '/servoservice'
@@ -14,7 +15,7 @@ def register_servoservice_socketio(sio: AsyncServer):
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {sid} disconnected from servoservice namespace")
+        logger.info("Client %s disconnected from servoservice namespace", sid)
 
     
     @sio.on('servostatusevent', namespace=namespace)
@@ -27,6 +28,7 @@ def register_servoservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
+            logger.exception("Error handling servostatusevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
@@ -42,6 +44,7 @@ def register_servoservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
+            logger.exception("Error handling servoventstatusevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

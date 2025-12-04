@@ -2,6 +2,7 @@
 
 import ipaddress
 import asyncio
+from loguru import logger
 
 from someipy import (
     construct_client_service_instance,
@@ -37,9 +38,12 @@ class EnvAppManager:
             self.newdpressevent = None
 
     async def find_service(self):
-        while not self.instance.service_found():
-            print("Waiting for service")
-            await asyncio.sleep(0.5)
+        try:
+            while not self.instance or not self.instance.service_found():
+                logger.debug("Waiting for service")
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            return
 
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
@@ -76,39 +80,39 @@ class EnvAppManager:
                     newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
                     self.newtempevent_1 = newTempEvent_1_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
             case 32770:
                 try:
                     newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
                     self.newtempevent_2 = newTempEvent_2_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
             case 32771:
                 try:
                     newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
                     self.newtempevent_3 = newTempEvent_3_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
             case 32772:
                 try:
                     newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
                     self.newpressevent = newPressEvent_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
             case 32773:
                 try:
                     newDPressEvent_msg = newDPressEventOut().deserialize(someip_message.payload)
                     self.newdpressevent = newDPressEvent_msg.data.value
                 except Exception as e:
-                    print(f"Error in deserialization: {e}")
+                    logger.exception("Error in deserialization: {}", e)
     
     async def shutdown(self):
         if self.instance:
-            self.instance.close()
+            await self.instance.close()
 
     def get_newtempevent_1(self):
         return self.newtempevent_1
@@ -132,7 +136,7 @@ async def initialize_envapp(sd):
     try:
         await asyncio.Future()
     except asyncio.CancelledError:
-        print("Shutting down...")
+        logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
 

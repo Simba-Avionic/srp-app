@@ -1,5 +1,6 @@
 
 from socketio import AsyncServer
+from loguru import logger
 from proxy.app.services.fileloggerapp import FileLoggerAppManager
 
 namespace = '/fileloggerapp'
@@ -14,6 +15,6 @@ def register_fileloggerapp_socketio(sio: AsyncServer):
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {sid} disconnected from fileloggerapp namespace")
+        logger.info("Client %s disconnected from fileloggerapp namespace", sid)
 
     
