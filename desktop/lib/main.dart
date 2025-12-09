@@ -84,40 +84,50 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       if (confirmStop == true) {
+        try {
+          final body = {};
+          final response = await http.post(
+            Uri.parse('http://localhost:5000/save/stop'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(body),
+          );
+          if (response.statusCode == 200) {
+            final responseData = json.decode(response.body);
+            print("Stopped saving data... Response: $responseData");
+            setState(() {
+              isSaving = false;
+            });
+          } else {
+            print("Failed to stop saving data. Status: ${response.statusCode}, Body: ${response.body}");
+          }
+        } catch (e) {
+          print("Error stopping save: $e");
+        }
+      }
+    }
+    else{ //if not saving
+      try {
         final body = {};
         final response = await http.post(
-          Uri.parse('http://localhost:5000/save/stop'),
+          Uri.parse('http://localhost:5000/save/start'),
           headers: {
             'Content-Type': 'application/json',
           },
           body: json.encode(body),
         );
         if (response.statusCode == 200) {
-          print("Stopped saving data...");
+          final responseData = json.decode(response.body);
+          print("Started saving data... Response: $responseData");
           setState(() {
-            isSaving = false;
+            isSaving = true;
           });
         } else {
-          print("Failed to stop saving data.");
+          print("Failed to start saving data. Status: ${response.statusCode}, Body: ${response.body}");
         }
-      }
-    }
-    else{ //if not saving
-      final body = {};
-      final response = await http.post(
-        Uri.parse('http://localhost:5000/save/start'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(body),
-      );
-      if (response.statusCode == 200) {
-        print("Started saving data...");
-        setState(() {
-          isSaving = true;
-        });
-      } else {
-        print("Failed to start saving data.");
+      } catch (e) {
+        print("Error starting save: $e");
       }
     }
   }
