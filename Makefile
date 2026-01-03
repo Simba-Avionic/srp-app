@@ -1,4 +1,4 @@
-.PHONY: clean build run-all run-proxy run-desktop gds
+.PHONY: clean build run-all run-proxy run-desktop
 
 clean:
 	rm -rf desktop/build/*
