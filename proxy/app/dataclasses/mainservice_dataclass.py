@@ -6,21 +6,7 @@ from someipy.serialization import (
 )
 
 @dataclass
-class StartIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class StartOut(SomeIpPayload):
-    data: Bool
-    def __init__(self):
-        self.data = Bool()
-
-    def from_json(self, json_argument):
-        self.data.value = bool(json_argument)
-
-@dataclass
-class SetModeIn(SomeIpPayload):
+class setModeIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -29,7 +15,7 @@ class SetModeIn(SomeIpPayload):
         self.data.value = int(json_argument)
 
 @dataclass
-class SetModeOut(SomeIpPayload):
+class setModeOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -38,7 +24,7 @@ class SetModeOut(SomeIpPayload):
         self.data.value = bool(json_argument)
 
 @dataclass
-class CurrentModeOut(SomeIpPayload):
+class CurrentModeStatusEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()

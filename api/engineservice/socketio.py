@@ -28,7 +28,7 @@ def register_engineservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling currentmode: %s", e)
+            logger.exception("Error handling event currentmode: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

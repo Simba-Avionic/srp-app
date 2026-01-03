@@ -1,7 +1,8 @@
 
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
-from proxy.app.dataclasses.primerservice_dataclass import (OnPrimeOut, StartPrimeOut, OffPrimeOut)
+from loguru import logger
+from proxy.app.dataclasses.primerservice_dataclass import (OffPrimeOut, OnPrimeOut, StartPrimeOut)
 from proxy.app.services.primerservice import PrimerServiceManager
 from api.common import process_method_result
 
@@ -19,6 +20,7 @@ async def offprime(data: dict = Body(...)):
         method_result = await service_manager.OffPrime(**params)
         return process_method_result(method_result, deserialization_class=OffPrimeOut)
     except Exception as e:
+        logger.exception("Error in offprime handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -32,6 +34,7 @@ async def onprime(data: dict = Body(...)):
         method_result = await service_manager.OnPrime(**params)
         return process_method_result(method_result, deserialization_class=OnPrimeOut)
     except Exception as e:
+        logger.exception("Error in onprime handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -45,6 +48,7 @@ async def startprime(data: dict = Body(...)):
         method_result = await service_manager.StartPrime(**params)
         return process_method_result(method_result, deserialization_class=StartPrimeOut)
     except Exception as e:
+        logger.exception("Error in startprime handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

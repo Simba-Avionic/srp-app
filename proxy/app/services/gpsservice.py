@@ -11,16 +11,14 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.fileloggerapp_dataclass import LoggingStateOut
-from proxy.app.dataclasses.fileloggerapp_dataclass import StartIn
-from proxy.app.dataclasses.fileloggerapp_dataclass import StopIn
+from proxy.app.dataclasses.gpsservice_dataclass import GPSStatusEventOut
 
-class FileLoggerAppManager:
+class GPSServiceManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(FileLoggerAppManager, cls).__new__(cls)
+            cls.__instance = super(GPSServiceManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -28,7 +26,7 @@ class FileLoggerAppManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.loggingstate = None
+            self.gpsstatusevent = None
 
     async def find_service(self):
         try:
@@ -46,17 +44,17 @@ class FileLoggerAppManager:
             id=32769, event_ids=[32769]
         )
 
-        fileloggerapp = (
+        gpsservice = (
             ServiceBuilder()
-            .with_service_id(517)
+            .with_service_id(519)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=fileloggerapp,
+            service=gpsservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10300),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10304),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -70,8 +68,8 @@ class FileLoggerAppManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    LoggingState_msg = LoggingStateOut().deserialize(someip_message.payload)
-                    self.loggingstate = LoggingState_msg.data.value
+                    GPSStatusEvent_msg = GPSStatusEventOut().deserialize(someip_message.payload)
+                    self.gpsstatusevent = GPSStatusEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -79,27 +77,11 @@ class FileLoggerAppManager:
         if self.instance:
             await self.instance.close()
 
-    def get_loggingstate(self):
-        return self.loggingstate
+    def get_gpsstatusevent(self):
+        return self.gpsstatusevent
     
-    async def Start(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            1, b''
-        )
-    
-        return method_result
-    
-    async def Stop(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            2, b''
-        )
-    
-        return method_result
-    
-async def initialize_fileloggerapp(sd):
-    service_manager = FileLoggerAppManager()
+async def initialize_gpsservice(sd):
+    service_manager = GPSServiceManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

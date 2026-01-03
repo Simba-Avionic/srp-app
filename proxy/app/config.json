@@ -2,5 +2,5 @@
     "MULTICAST_GROUP": "224.224.224.245",
     "INTERFACE_IP": "0.0.0.0",
     "SD_PORT": 30490,
-    "NEXT_PORT": 10260
+    "NEXT_PORT": 10306
 }

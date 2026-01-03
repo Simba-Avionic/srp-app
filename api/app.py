@@ -5,7 +5,7 @@ import sys
 import os
 from loguru import logger as loguru_logger
 
-# Dodaj folder nadrzędny do ścieżki
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from fastapi import FastAPI
@@ -67,6 +67,7 @@ from proxy.app.services.engineservice import initialize_engineservice
 
 # envapp
 from api.envapp.socketio import register_envapp_socketio
+from api.envapp.router import router as envapp_router
 from proxy.app.services.envapp import initialize_envapp
 
 # file logger
@@ -83,6 +84,19 @@ from api.primerservice.router import router as primer_router
 from api.primerservice.socketio import register_primerservice_socketio
 from proxy.app.services.primerservice import initialize_primerservice
 
+# recovery
+from api.recoveryservice.router import router as recoveryservice_router
+from api.recoveryservice.socketio import register_recoveryservice_socketio
+from proxy.app.services.recoveryservice import initialize_recoveryservice
+
+# gps
+from api.gpsservice.socketio import register_gpsservice_socketio
+from proxy.app.services.gpsservice import initialize_gpsservice
+
+# main
+from api.mainservice.router import router as mainservice_router
+from api.mainservice.socketio import register_mainservice_socketio
+from proxy.app.services.mainservice import initialize_mainservice
 
 sio = AsyncServer(
     async_mode='asgi',
@@ -109,11 +123,17 @@ app.include_router(save_router)
 app.include_router(servo_router)
 app.include_router(filelogger_router)
 app.include_router(primer_router)
+app.include_router(envapp_router)
+app.include_router(recoveryservice_router)
+app.include_router(mainservice_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
 register_envapp_socketio(sio)
 register_primerservice_socketio(sio)
+register_gpsservice_socketio(sio)
+register_mainservice_socketio(sio)
+register_recoveryservice_socketio(sio)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -144,21 +164,28 @@ async def lifespan(app: FastAPI):
     servo_task = asyncio.create_task(run_servo_service_manager(sd_instance))
     filelogger_task = asyncio.create_task(run_fileloggerapp_manager(sd_instance))
     primer_task = asyncio.create_task(run_primerservice_manager(sd_instance))
-
+    main_task = asyncio.create_task(run_mainservice_manager(sd_instance))
+    gps_task = asyncio.create_task(run_gpsservice_manager(sd_instance))
+    recovery_task = asyncio.create_task(run_recovery_manager(sd_instance))
 
     yield
 
     # graceful shutdown
-    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
+    all_tasks = (
+        engine_task, env_task, servo_task, filelogger_task, primer_task,
+        main_task, gps_task, recovery_task
+    )
+
+    for t in all_tasks:
         t.cancel()
-    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
+    
+    for t in all_tasks:
         try:
             await t
         except asyncio.CancelledError:
             pass
 
     await sd_instance.shutdown()
-
 
 app.router.lifespan_context = lifespan
 
@@ -176,6 +203,15 @@ async def run_fileloggerapp_manager(sd):
 
 async def run_primerservice_manager(sd):
     await initialize_primerservice(sd)
+
+async def run_mainservice_manager(sd):
+    await initialize_mainservice(sd)
+
+async def run_gpsservice_manager(sd):
+    await initialize_gpsservice(sd)
+
+async def run_recovery_manager(sd):
+    await initialize_recoveryservice(sd)
 
 
 if __name__ == '__main__':

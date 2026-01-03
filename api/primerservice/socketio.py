@@ -1,5 +1,6 @@
 
 from socketio import AsyncServer
+from loguru import logger
 from proxy.app.services.primerservice import PrimerServiceManager
 
 namespace = '/primerservice'
@@ -14,7 +15,7 @@ def register_primerservice_socketio(sio: AsyncServer):
 
     @sio.on('disconnect', namespace=namespace)
     async def disconnect(sid):
-        print(f"Client {sid} disconnected from primerservice namespace")
+        logger.info("Client %s disconnected from primerservice namespace", sid)
 
     
     @sio.on('primestatusevent', namespace=namespace)
@@ -27,6 +28,7 @@ def register_primerservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
+            logger.exception("Error handling event primestatusevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

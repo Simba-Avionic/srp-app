@@ -1,5 +1,4 @@
 
-
 import ipaddress
 import asyncio
 from loguru import logger
@@ -37,7 +36,6 @@ class EngineServiceManager:
                 logger.debug("Waiting for service")
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
-            # Graceful task cancellation during shutdown
             return
 
     def assign_service_discovery(self, new_sd):
@@ -58,7 +56,7 @@ class EngineServiceManager:
         self.instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10253),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10299),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -75,7 +73,7 @@ class EngineServiceManager:
                     CurrentMode_msg = CurrentModeOut().deserialize(someip_message.payload)
                     self.currentmode = CurrentMode_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
     async def shutdown(self):
         if self.instance:
@@ -112,4 +110,3 @@ async def initialize_engineservice(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-

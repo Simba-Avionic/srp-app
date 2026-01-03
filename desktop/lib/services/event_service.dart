@@ -23,7 +23,7 @@ class EventService {
     });
 
     _socket.on(event, (msg) {
-      print('Received $event response: $msg');
+     // print('Received $event response: $msg');
 
       try {
         var responseData = msg is String ? jsonDecode(msg) : msg;

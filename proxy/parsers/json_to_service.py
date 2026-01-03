@@ -1,27 +1,27 @@
 import json
-import os
+from pathlib import Path
 from typing import Dict, Any
 
 from proxy.app import settings
 from proxy.app.utils import increment_port
 
+# --- Globals ---
+BASE_OUTPUT_DIR = (Path(__file__).resolve().parent / "../../proxy/app/services").resolve()
 
-def load_json(file_path: str) -> Dict[str, Any]:
-    with open(file_path, "r") as file:
-        return json.load(file)
+# --- Parsing Helpers ---
+def load_json(path: Path) -> Dict[str, Any]:
+    with path.open("r") as f:
+        return json.load(f)
 
-
-def save_code(file_path: str, code: str):
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    print(file_path)
-    with open(file_path, "w") as file:
-        file.write(code)
-
-
-def generate_service_code(parsed_config, ttl=5):
+# --- Code Generator ---
+def generate_service_code(parsed_config: Dict[str, Any], ttl=5) -> tuple[str, str]:
     services = parsed_config['someip']
-    service_code = f"""
+    
+    # We assume the file usually contains one main service or we name the file after the last one processed
+    # (This matches your previous logic where service_name variable persisted)
+    service_name = "" 
 
+    service_code = f"""
 import ipaddress
 import asyncio
 from loguru import logger
@@ -36,12 +36,13 @@ from someipy import (
 from proxy.app.settings import INTERFACE_IP
 """
 
-    for service_name, service_config in services.items():
+    for s_name, service_config in services.items():
+        service_name = s_name # Capture name for file saving
         for event_name in service_config.get('events', {}).keys():
-            service_code += f"from proxy.app.dataclasses.{service_name.lower()}_dataclass import {event_name}Out\n"
+            service_code += f"from proxy.app.dataclasses.{s_name.lower()}_dataclass import {event_name}Out\n"
 
         for method_name in service_config.get('methods', {}).keys():
-            service_code += f"from proxy.app.dataclasses.{service_name.lower()}_dataclass import {method_name}In\n"
+            service_code += f"from proxy.app.dataclasses.{s_name.lower()}_dataclass import {method_name}In\n"
 
     service_code += f"""
 class {service_name}Manager:
@@ -57,11 +58,12 @@ class {service_name}Manager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None"""
-    for service_name, service_config in services.items():
+    
+    for s_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
             service_code += f"""
             self.{event_name.lower()} = None"""
-    # service and instance definition
+
     service_code += f"""
 
     async def find_service(self):
@@ -77,7 +79,7 @@ class {service_name}Manager:
 
     async def setup_manager(self) -> None:"""
 
-    for service_name, service_config in services.items():
+    for s_name, service_config in services.items():
         event_ids = [event_config['id'] for event_config in service_config.get('events', {}).values()]
 
         if event_ids:
@@ -86,10 +88,10 @@ class {service_name}Manager:
             id={event_ids[0]}, event_ids={event_ids}
         )"""
 
-    for service_name, service_config in services.items():
+    for s_name, service_config in services.items():
         service_code += f"""
 
-        {service_name.lower()} = (
+        {s_name.lower()} = (
             ServiceBuilder()
             .with_service_id({service_config['service_id']})
             .with_major_version({service_config['major_version']})"""
@@ -102,7 +104,7 @@ class {service_name}Manager:
         )
 
         self.instance = await construct_client_service_instance(
-            service={service_name.lower()},
+            service={s_name.lower()},
             instance_id=1,
             endpoint=(ipaddress.IPv4Address(INTERFACE_IP), {settings.NEXT_PORT}),
             ttl={ttl},
@@ -120,16 +122,21 @@ class {service_name}Manager:
         self.service_discovery.attach(self.instance)
         """
 
-
         increment_port()
 
     # event callback
-    if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
+    has_events = False
+    for s_name, service_config in services.items():
+        if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
+            has_events = True
+            break
+            
+    if has_events:
         service_code += f"""
     def event_callback(self, someip_message: SomeIpMessage) -> None:
         match someip_message.header.method_id:"""
 
-    for service_name, service_config in services.items():
+    for s_name, service_config in services.items():
         for event_name, event_config in service_config.get('events', {}).items():
             service_code += f"""
             case {event_config['id']}:
@@ -137,7 +144,7 @@ class {service_name}Manager:
                     {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
                     self.{event_name.lower()} = {event_name}_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {{e}}")
     """
 
     service_code += """
@@ -146,34 +153,39 @@ class {service_name}Manager:
             await self.instance.close()
 """
     # getter for event state
-    for service_name, service_config in services.items():
+    for s_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
             service_code += f"""
     def get_{event_name.lower()}(self):
         return self.{event_name.lower()}
     """
+    
     # methods
-    for method_name, method_config in service_config.get('methods', {}).items():
-        in_type = method_config['data_structure']['in']['type']
-        service_code += f"""
+    # (Note: Assuming only one service config loop for methods is safe based on previous code structure)
+    for s_name, service_config in services.items():
+        for method_name, method_config in service_config.get('methods', {}).items():
+            in_type = method_config['data_structure']['in']['type']
+            orig_name = method_name
+            method_name = method_name[0].upper() + method_name[1:]
+            service_code += f"""
     async def {method_name}(self{', ' + method_name.lower() if in_type != 'void' else ''}):
         await self.find_service()"""
 
-        if in_type == 'void':
-            service_code += f"""
+            if in_type == 'void':
+                service_code += f"""
         method_result = await self.instance.call_method(
             {method_config['id']}, b''
         )
     """
-        else:
-            service_code += f"""
-        {method_name.lower()}_msg = {method_name}In()
+            else:
+                service_code += f"""
+        {method_name.lower()}_msg = {orig_name}In()
         {method_name.lower()}_msg.from_json({method_name.lower()})
         method_result = await self.instance.call_method(
             {method_config['id']}, {method_name.lower()}_msg.serialize()
         )
     """
-        service_code += """
+            service_code += """
         return method_result
     """
 
@@ -188,34 +200,28 @@ async def initialize_{service_name.lower()}(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-
 """
 
-    save_code(f'../app/services/{service_name.lower()}.py', service_code)
-    print(service_code)
-    return service_code
+    return service_code, service_name
 
+# --- Main Execution ---
 
-def process_service_json(input_json_path: str):
-    parsed_config = load_json(input_json_path)
-    generate_service_code(parsed_config)
+def process_directory(directory_path: Path):
+    BASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# for single files
-input_json_path = '/home/krzysztof/srp-app/system_definition/someip/prim_service/service.json'
-process_service_json(input_json_path)
+    print("Generating service manager files...")
+    
+    for file in directory_path.rglob("*.json"):
+        if file.name.endswith("data_type.json"):
+            continue
 
-def process_multiple_services_json(input_json_path: str, output_dir: str):
-    for root, dirs, files in os.walk(input_json_path):
-        for file in files:
-            if file.endswith('.json'):
-                json_file_path = os.path.join(root, file)
-                print(f"Processing {json_file_path}...")
+        print(f"Processing {file}...")
+        data = load_json(file)
+        code, name = generate_service_code(data)
 
-                parsed_config = load_json(json_file_path)
+        output_path = BASE_OUTPUT_DIR / f"{name.lower()}.py"
+        output_path.write_text(code)
+        print(f"Generated: {output_path}")
 
-                generate_service_code(parsed_config)
-
-
-
-# input_json_path = '../../system_definition/someip'
-# process_multiple_services_json(input_json_path, '../app/services/')
+if __name__ == "__main__":
+    process_directory(Path("/home/krzysztof/srp-app/system_definition/someip/"))

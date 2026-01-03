@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 void main() async {
-  String filePath = '/home/krzysztof/srp-app/system_definition/someip/prim_service/service.json'; //pass here path, absolute path preferable
+  String filePath = '/home/krzysztof/srp-app/system_definition/someip/engine_service/service.json'; //pass here path, absolute path preferable
 
   File file = File(filePath);
   String jsonData = await file.readAsString();

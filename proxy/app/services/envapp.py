@@ -1,5 +1,4 @@
 
-
 import ipaddress
 import asyncio
 from loguru import logger
@@ -16,7 +15,7 @@ from proxy.app.dataclasses.envapp_dataclass import newTempEvent_1Out
 from proxy.app.dataclasses.envapp_dataclass import newTempEvent_2Out
 from proxy.app.dataclasses.envapp_dataclass import newTempEvent_3Out
 from proxy.app.dataclasses.envapp_dataclass import newPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import newDPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import calPressureSensorIn
 
 class EnvAppManager:
     __instance = None
@@ -35,7 +34,6 @@ class EnvAppManager:
             self.newtempevent_2 = None
             self.newtempevent_3 = None
             self.newpressevent = None
-            self.newdpressevent = None
 
     async def find_service(self):
         try:
@@ -50,7 +48,7 @@ class EnvAppManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773]
+            id=32769, event_ids=[32769, 32770, 32771, 32772]
         )
 
         envapp = (
@@ -63,7 +61,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10252),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10298),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -80,35 +78,28 @@ class EnvAppManager:
                     newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
                     self.newtempevent_1 = newTempEvent_1_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
                     newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
                     self.newtempevent_2 = newTempEvent_2_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32771:
                 try:
                     newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
                     self.newtempevent_3 = newTempEvent_3_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32772:
                 try:
                     newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
                     self.newpressevent = newPressEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
-    
-            case 32773:
-                try:
-                    newDPressEvent_msg = newDPressEventOut().deserialize(someip_message.payload)
-                    self.newdpressevent = newDPressEvent_msg.data.value
-                except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
     async def shutdown(self):
         if self.instance:
@@ -126,8 +117,13 @@ class EnvAppManager:
     def get_newpressevent(self):
         return self.newpressevent
     
-    def get_newdpressevent(self):
-        return self.newdpressevent
+    async def CalPressureSensor(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            1, b''
+        )
+    
+        return method_result
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()
@@ -139,4 +135,3 @@ async def initialize_envapp(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-

@@ -18,22 +18,6 @@ def register_envapp_socketio(sio: AsyncServer):
         logger.info("Client %s disconnected from envapp namespace", sid)
 
     
-    @sio.on('newdpressevent', namespace=namespace)
-    async def get_newdpressevent(sid, data):
-        try:
-            manager = EnvAppManager()
-            response = manager.get_newdpressevent()
-            await sio.emit('newdpressevent', 
-                          {'event_name': 'newdpressevent', 'response': response},
-                          room=sid,
-                          namespace=namespace)
-        except Exception as e:
-            logger.exception("Error handling newdpressevent: %s", e)
-            await sio.emit('event_error',
-                          {'error': str(e)},
-                          room=sid,
-                          namespace=namespace)
-    
     @sio.on('newpressevent', namespace=namespace)
     async def get_newpressevent(sid, data):
         try:
@@ -44,7 +28,7 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling newpressevent: %s", e)
+            logger.exception("Error handling event newpressevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
@@ -60,7 +44,7 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling newtempevent_1: %s", e)
+            logger.exception("Error handling event newtempevent_1: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
@@ -76,7 +60,7 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling newtempevent_2: %s", e)
+            logger.exception("Error handling event newtempevent_2: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
@@ -92,7 +76,7 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling newtempevent_3: %s", e)
+            logger.exception("Error handling event newtempevent_3: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

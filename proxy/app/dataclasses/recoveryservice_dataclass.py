@@ -6,12 +6,12 @@ from someipy.serialization import (
 )
 
 @dataclass
-class OnPrimeIn(SomeIpPayload):
+class OpenReefedParachuteIn(SomeIpPayload):
     data: bytes = b''
 
 
 @dataclass
-class OnPrimeOut(SomeIpPayload):
+class OpenReefedParachuteOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -20,12 +20,12 @@ class OnPrimeOut(SomeIpPayload):
         self.data.value = bool(json_argument)
 
 @dataclass
-class OffPrimeIn(SomeIpPayload):
+class UnreefeParachuteIn(SomeIpPayload):
     data: bytes = b''
 
 
 @dataclass
-class OffPrimeOut(SomeIpPayload):
+class UnreefeParachuteOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -34,21 +34,7 @@ class OffPrimeOut(SomeIpPayload):
         self.data.value = bool(json_argument)
 
 @dataclass
-class StartPrimeIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class StartPrimeOut(SomeIpPayload):
-    data: Bool
-    def __init__(self):
-        self.data = Bool()
-
-    def from_json(self, json_argument):
-        self.data.value = bool(json_argument)
-
-@dataclass
-class primeStatusEventOut(SomeIpPayload):
+class NewParachuteStatusEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
