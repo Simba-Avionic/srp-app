@@ -7,18 +7,27 @@ from proxy.app.utils import increment_port
 
 # --- Globals ---
 BASE_OUTPUT_DIR = (Path(__file__).resolve().parent / "../../proxy/app/services").resolve()
+STRUCT_REGISTRY: Dict[str, Dict[str, str]] = {}
 
 # --- Parsing Helpers ---
 def load_json(path: Path) -> Dict[str, Any]:
     with path.open("r") as f:
         return json.load(f)
 
+def find_structs(file_path: Path):
+    """Scans data_type files to build a registry of struct fields."""
+    data = load_json(file_path)
+    structures = data.get("data_structure", {})
+    for struct_name, fields in structures.items():
+        STRUCT_REGISTRY[struct_name] = fields
+
+def parse_type_name(data_type: str) -> str:
+    """Extracts the simple type name from a namespaced string."""
+    return data_type.split(".")[-1].split("/")[-1]
+
 # --- Code Generator ---
 def generate_service_code(parsed_config: Dict[str, Any], ttl=5) -> tuple[str, str]:
     services = parsed_config['someip']
-    
-    # We assume the file usually contains one main service or we name the file after the last one processed
-    # (This matches your previous logic where service_name variable persisted)
     service_name = "" 
 
     service_code = f"""
@@ -36,14 +45,18 @@ from someipy import (
 from proxy.app.settings import INTERFACE_IP
 """
 
+    # Imports
     for s_name, service_config in services.items():
-        service_name = s_name # Capture name for file saving
+        service_name = s_name 
         for event_name in service_config.get('events', {}).keys():
+            event_name = event_name[0].upper() + event_name[1:]
             service_code += f"from proxy.app.dataclasses.{s_name.lower()}_dataclass import {event_name}Out\n"
 
         for method_name in service_config.get('methods', {}).keys():
+            method_name = method_name[0].upper() + method_name[1:]
             service_code += f"from proxy.app.dataclasses.{s_name.lower()}_dataclass import {method_name}In\n"
 
+    # Class Definition
     service_code += f"""
 class {service_name}Manager:
     __instance = None
@@ -59,6 +72,7 @@ class {service_name}Manager:
             self.initialized = False
             self.instance = None"""
     
+    # Init variables
     for s_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
             service_code += f"""
@@ -79,6 +93,7 @@ class {service_name}Manager:
 
     async def setup_manager(self) -> None:"""
 
+    # Event Groups
     for s_name, service_config in services.items():
         event_ids = [event_config['id'] for event_config in service_config.get('events', {}).values()]
 
@@ -88,6 +103,7 @@ class {service_name}Manager:
             id={event_ids[0]}, event_ids={event_ids}
         )"""
 
+    # Service Construction
     for s_name, service_config in services.items():
         service_code += f"""
 
@@ -124,7 +140,7 @@ class {service_name}Manager:
 
         increment_port()
 
-    # event callback
+    # --- Event Callback Logic ---
     has_events = False
     for s_name, service_config in services.items():
         if any(event_config.get('id') for event_config in service_config.get('events', {}).values()):
@@ -138,11 +154,29 @@ class {service_name}Manager:
 
     for s_name, service_config in services.items():
         for event_name, event_config in service_config.get('events', {}).items():
+            class_name = event_name[0].upper() + event_name[1:]
+            
+            # Check data type for struct detection
+            out_type_raw = event_config['data_structure']['out']['type']
+            simple_type = parse_type_name(out_type_raw)
+            
+            assignment_line = ""
+            if simple_type in STRUCT_REGISTRY:
+                # It is a struct -> construct list of values
+                fields = STRUCT_REGISTRY[simple_type].keys()
+                # Creates: [msg.data.field1.value, msg.data.field2.value, ...]
+                value_list = [f"{event_name}_msg.data.{field}.value" for field in fields]
+                list_str = ", ".join(value_list)
+                assignment_line = f"self.{event_name.lower()} = [{list_str}]"
+            else:
+                # Primitive -> direct value access
+                assignment_line = f"self.{event_name.lower()} = {event_name}_msg.data.value"
+
             service_code += f"""
             case {event_config['id']}:
                 try:
-                    {event_name}_msg = {event_name}Out().deserialize(someip_message.payload)
-                    self.{event_name.lower()} = {event_name}_msg.data.value
+                    {event_name}_msg = {class_name}Out().deserialize(someip_message.payload)
+                    {assignment_line}
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {{e}}")
     """
@@ -152,7 +186,7 @@ class {service_name}Manager:
         if self.instance:
             await self.instance.close()
 """
-    # getter for event state
+    # Getters
     for s_name, service_config in services.items():
         for event_name in service_config.get('events', {}).keys():
             service_code += f"""
@@ -160,8 +194,7 @@ class {service_name}Manager:
         return self.{event_name.lower()}
     """
     
-    # methods
-    # (Note: Assuming only one service config loop for methods is safe based on previous code structure)
+    # Methods
     for s_name, service_config in services.items():
         for method_name, method_config in service_config.get('methods', {}).items():
             in_type = method_config['data_structure']['in']['type']
@@ -209,8 +242,12 @@ async def initialize_{service_name.lower()}(sd):
 def process_directory(directory_path: Path):
     BASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    print("Scanning for structs...")
+    # Pre-scan for data types to populate registry
+    for file in directory_path.rglob("*data_type.json"):
+        find_structs(file)
+
     print("Generating service manager files...")
-    
     for file in directory_path.rglob("*.json"):
         if file.name.endswith("data_type.json"):
             continue

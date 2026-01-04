@@ -19,6 +19,7 @@ class StartOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
 
+
 @dataclass
 class StopIn(SomeIpPayload):
     data: bytes = b''
@@ -32,6 +33,7 @@ class StopOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class LoggingStateOut(SomeIpPayload):

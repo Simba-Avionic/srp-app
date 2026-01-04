@@ -5,6 +5,15 @@ from typing import Dict, Any, Set, List
 STRUCT_REGISTRY: Dict[str, Dict[str, str]] = {}
 BASE_OUTPUT_DIR = (Path(__file__).resolve().parent / "../../proxy/app/dataclasses").resolve()
 
+# Mapping for byte size calculations
+TYPE_SIZES = {
+    "Bool": 1, "Uint8": 1, "Sint8": 1,
+    "Uint16": 2, "Sint16": 2,
+    "Uint32": 4, "Sint32": 4, "Float32": 4,
+    "Uint64": 8, "Sint64": 8, "Float64": 8,
+    "bytes": 0 # Special case, usually dynamic
+}
+
 def load_json(path: Path) -> Dict[str, Any]:
     with path.open("r") as f:
         return json.load(f)
@@ -34,9 +43,25 @@ def get_cast_function_name(data_type: str) -> str:
     }
     return cast_map.get(data_type, "str")
 
+def get_type_size(type_name: str) -> int:
+    """Recursively calculates the size in bytes for a given type."""
+    if type_name in TYPE_SIZES:
+        return TYPE_SIZES[type_name]
+    
+    if type_name in STRUCT_REGISTRY:
+        total_size = 0
+        for field_type in STRUCT_REGISTRY[type_name].values():
+            ptype = parse_type(field_type)
+            total_size += get_type_size(ptype)
+        return total_size
+    
+    return 0  # Fallback
+
 def generate_class_definition(name: str, fields: Dict[str, str], is_struct: bool = False) -> str:
+    name = name[0].upper() + name[1:]
     lines = ["@dataclass", f"class {name}:" if is_struct else f"class {name}(SomeIpPayload):"]
     
+    # --- Fields and __init__ ---
     if not fields and not is_struct:
         lines.append("    data: bytes = b''")
     else:
@@ -51,6 +76,14 @@ def generate_class_definition(name: str, fields: Dict[str, str], is_struct: bool
 
     lines.append("")
     
+    if is_struct and fields:
+        lines.append("    def __init__(self):")
+        for field, f_type in fields.items():
+            ptype = parse_type(f_type)
+            lines.append(f"        self.{field} = {ptype}()")
+        lines.append("")
+
+    # --- from_json ---
     if fields or is_struct:
         arg_name = "json_obj" if is_struct else "json_argument"
         lines.append(f"    def from_json(self, {arg_name}):")
@@ -67,6 +100,29 @@ def generate_class_definition(name: str, fields: Dict[str, str], is_struct: bool
                 cast = get_cast_function_name(ptype)
                 source = f"{arg_name}['{field}']" if is_struct else arg_name
                 lines.append(f"        {target}.value = {cast}({source})")
+        lines.append("")
+
+    # --- deserialize (Only for Structs or Wrappers containing Structs) ---
+    has_struct_field = False
+    if not is_struct and fields:
+        # Check if the wrapper contains a struct
+        ptype = parse_type(fields["type"])
+        if ptype in STRUCT_REGISTRY:
+            has_struct_field = True
+            lines.append("    def deserialize(self, payload: bytes):")
+            lines.append("        self.data.deserialize(payload)")
+            lines.append("        return self")
+
+    if is_struct:
+        lines.append("    def deserialize(self, payload: bytes):")
+        current_offset = 0
+        for field, f_type in fields.items():
+            ptype = parse_type(f_type)
+            size = get_type_size(ptype)
+            
+            end_offset = current_offset + size
+            lines.append(f"        self.{field}.deserialize(payload[{current_offset}:{end_offset}])")
+            current_offset = end_offset
 
     return "\n".join(lines)
 
@@ -77,6 +133,7 @@ def generate_structs_file():
     used_types = set()
     classes = []
 
+    # Two-pass to ensure used primitives are imported
     for name, fields in STRUCT_REGISTRY.items():
         for f_type in fields.values():
             ptype = parse_type(f_type)
@@ -159,4 +216,5 @@ def process_directory(directory_path: Path):
         print(f"Generated: {output_path}")
 
 if __name__ == "__main__":
+    # Adjust path as necessary
     process_directory(Path("/home/krzysztof/srp-app/system_definition/someip/"))

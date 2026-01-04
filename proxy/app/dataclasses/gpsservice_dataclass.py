@@ -14,3 +14,7 @@ class GPSStatusEventOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.from_json(json_argument)
+
+    def deserialize(self, payload: bytes):
+        self.data.deserialize(payload)
+        return self

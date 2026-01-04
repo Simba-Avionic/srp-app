@@ -19,6 +19,7 @@ class StartOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
 
+
 @dataclass
 class SetModeIn(SomeIpPayload):
     data: Uint8
@@ -28,6 +29,7 @@ class SetModeIn(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetModeOut(SomeIpPayload):
     data: Bool
@@ -36,6 +38,7 @@ class SetModeOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class CurrentModeOut(SomeIpPayload):

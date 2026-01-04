@@ -9,12 +9,12 @@ from .structs import (
 )
 
 @dataclass
-class calPressureSensorIn(SomeIpPayload):
+class CalPressureSensorIn(SomeIpPayload):
     data: bytes = b''
 
 
 @dataclass
-class calPressureSensorOut(SomeIpPayload):
+class CalPressureSensorOut(SomeIpPayload):
     data: PressCalibrationRes
     def __init__(self):
         self.data = PressCalibrationRes()
@@ -22,8 +22,12 @@ class calPressureSensorOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.from_json(json_argument)
 
+    def deserialize(self, payload: bytes):
+        self.data.deserialize(payload)
+        return self
+
 @dataclass
-class newTempEvent_1Out(SomeIpPayload):
+class NewTempEvent_1Out(SomeIpPayload):
     data: Sint16
     def __init__(self):
         self.data = Sint16()
@@ -31,8 +35,9 @@ class newTempEvent_1Out(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
-class newTempEvent_2Out(SomeIpPayload):
+class NewTempEvent_2Out(SomeIpPayload):
     data: Sint16
     def __init__(self):
         self.data = Sint16()
@@ -40,8 +45,9 @@ class newTempEvent_2Out(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
-class newTempEvent_3Out(SomeIpPayload):
+class NewTempEvent_3Out(SomeIpPayload):
     data: Sint16
     def __init__(self):
         self.data = Sint16()
@@ -49,8 +55,9 @@ class newTempEvent_3Out(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
-class newPressEventOut(SomeIpPayload):
+class NewPressEventOut(SomeIpPayload):
     data: Uint16
     def __init__(self):
         self.data = Uint16()

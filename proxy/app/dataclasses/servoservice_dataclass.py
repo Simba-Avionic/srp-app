@@ -14,6 +14,7 @@ class SetMainServoValueIn(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetMainServoValueOut(SomeIpPayload):
     data: Bool
@@ -22,6 +23,7 @@ class SetMainServoValueOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class ReadMainServoValueIn(SomeIpPayload):
@@ -37,6 +39,7 @@ class ReadMainServoValueOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetVentServoValueIn(SomeIpPayload):
     data: Uint8
@@ -46,6 +49,7 @@ class SetVentServoValueIn(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetVentServoValueOut(SomeIpPayload):
     data: Bool
@@ -54,6 +58,7 @@ class SetVentServoValueOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class ReadVentServoValueIn(SomeIpPayload):
@@ -69,6 +74,7 @@ class ReadVentServoValueOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetDumpValueIn(SomeIpPayload):
     data: Uint8
@@ -78,6 +84,7 @@ class SetDumpValueIn(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class SetDumpValueOut(SomeIpPayload):
     data: Bool
@@ -86,6 +93,7 @@ class SetDumpValueOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class ReadDumpValueIn(SomeIpPayload):
@@ -101,6 +109,7 @@ class ReadDumpValueOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class ServoStatusEventOut(SomeIpPayload):
     data: Uint8
@@ -110,6 +119,7 @@ class ServoStatusEventOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
+
 @dataclass
 class ServoVentStatusEventOut(SomeIpPayload):
     data: Uint8
@@ -118,6 +128,7 @@ class ServoVentStatusEventOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
+
 
 @dataclass
 class ServoDumpStatusEventOut(SomeIpPayload):

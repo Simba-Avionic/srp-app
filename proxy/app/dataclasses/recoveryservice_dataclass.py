@@ -19,6 +19,7 @@ class OpenReefedParachuteOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
 
+
 @dataclass
 class UnreefeParachuteIn(SomeIpPayload):
     data: bytes = b''
@@ -32,6 +33,7 @@ class UnreefeParachuteOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class NewParachuteStatusEventOut(SomeIpPayload):

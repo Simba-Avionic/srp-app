@@ -54,7 +54,7 @@ class GPSServiceManager:
         self.instance = await construct_client_service_instance(
             service=gpsservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10304),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10340),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -69,7 +69,7 @@ class GPSServiceManager:
             case 32769:
                 try:
                     GPSStatusEvent_msg = GPSStatusEventOut().deserialize(someip_message.payload)
-                    self.gpsstatusevent = GPSStatusEvent_msg.data.value
+                    self.gpsstatusevent = [GPSStatusEvent_msg.data.latitude.value, GPSStatusEvent_msg.data.longitude.value, GPSStatusEvent_msg.data.altitude.value]
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     

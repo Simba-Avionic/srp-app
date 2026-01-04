@@ -11,7 +11,7 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.primerservice_dataclass import primeStatusEventOut
+from proxy.app.dataclasses.primerservice_dataclass import PrimeStatusEventOut
 from proxy.app.dataclasses.primerservice_dataclass import OnPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import OffPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import StartPrimeIn
@@ -57,7 +57,7 @@ class PrimerServiceManager:
         self.instance = await construct_client_service_instance(
             service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10297),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10333),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -71,7 +71,7 @@ class PrimerServiceManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    primeStatusEvent_msg = primeStatusEventOut().deserialize(someip_message.payload)
+                    primeStatusEvent_msg = PrimeStatusEventOut().deserialize(someip_message.payload)
                     self.primestatusevent = primeStatusEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")

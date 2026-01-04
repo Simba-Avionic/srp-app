@@ -19,6 +19,7 @@ class OnPrimeOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
 
+
 @dataclass
 class OffPrimeIn(SomeIpPayload):
     data: bytes = b''
@@ -32,6 +33,7 @@ class OffPrimeOut(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
+
 
 @dataclass
 class StartPrimeIn(SomeIpPayload):
@@ -47,8 +49,9 @@ class StartPrimeOut(SomeIpPayload):
     def from_json(self, json_argument):
         self.data.value = bool(json_argument)
 
+
 @dataclass
-class primeStatusEventOut(SomeIpPayload):
+class PrimeStatusEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()

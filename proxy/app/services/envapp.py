@@ -11,11 +11,11 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_1Out
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_2Out
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_3Out
-from proxy.app.dataclasses.envapp_dataclass import newPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import calPressureSensorIn
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_1Out
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_2Out
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_3Out
+from proxy.app.dataclasses.envapp_dataclass import NewPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import CalPressureSensorIn
 
 class EnvAppManager:
     __instance = None
@@ -61,7 +61,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10298),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10334),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -75,28 +75,28 @@ class EnvAppManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
+                    newTempEvent_1_msg = NewTempEvent_1Out().deserialize(someip_message.payload)
                     self.newtempevent_1 = newTempEvent_1_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
-                    newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
+                    newTempEvent_2_msg = NewTempEvent_2Out().deserialize(someip_message.payload)
                     self.newtempevent_2 = newTempEvent_2_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32771:
                 try:
-                    newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
+                    newTempEvent_3_msg = NewTempEvent_3Out().deserialize(someip_message.payload)
                     self.newtempevent_3 = newTempEvent_3_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32772:
                 try:
-                    newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
+                    newPressEvent_msg = NewPressEventOut().deserialize(someip_message.payload)
                     self.newpressevent = newPressEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")

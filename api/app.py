@@ -157,7 +157,7 @@ async def lifespan(app: FastAPI):
     global sd_instance
 
     sd_instance = await initialize_service_discovery()
-    set_someipy_log_level(logging.INFO)
+    set_someipy_log_level(logging.CRITICAL)
 
     engine_task = asyncio.create_task(run_engine_service_manager(sd_instance))
     env_task = asyncio.create_task(run_env_service_manager(sd_instance))

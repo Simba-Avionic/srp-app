@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.primerservice_dataclass import (OffPrimeOut, OnPrimeOut, StartPrimeOut)
+from proxy.app.dataclasses.primerservice_dataclass import (OnPrimeOut, OffPrimeOut, StartPrimeOut)
 from proxy.app.services.primerservice import PrimerServiceManager
 from api.common import process_method_result
 
