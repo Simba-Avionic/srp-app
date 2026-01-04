@@ -108,7 +108,14 @@ class Home extends StatelessWidget {
     };
 
     final services = [
-      GPSService
+      PrimerService,
+      EnvApp,
+      RecoveryService,
+      MainService,
+      GPSService,
+      FileLoggerApp,
+      ServoService,
+      EngineService,
     ];
     return Container(
       color: Colors.white,
