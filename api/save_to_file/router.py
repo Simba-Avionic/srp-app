@@ -8,16 +8,31 @@ from datetime import datetime
 
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
+from proxy.app.services.fileloggerapp import FileLoggerAppManager
+from proxy.app.services.gpsservice import GPSServiceManager
+from proxy.app.services.mainservice import MainServiceManager
+from proxy.app.services.primerservice import PrimerServiceManager
+from proxy.app.services.recoveryservice import RecoveryServiceManager
+from proxy.app.services.servoservice import ServoServiceManager
+
+managers = [
+    EngineServiceManager(),
+    EnvAppManager(),
+    FileLoggerAppManager(),
+    GPSServiceManager(),
+    MainServiceManager(),
+    PrimerServiceManager(),
+    RecoveryServiceManager(),
+    ServoServiceManager(),
+]
 
 current_dir = os.getcwd()
 
-csv_filename = os.path.join(current_dir,  '..','desktop', 'data', 'csv', 'data.csv')
+csv_filename = os.path.join(current_dir, 'desktop', 'data', 'csv', 'data.csv')
 
 csv_filename = os.path.abspath(csv_filename)
 
 csv_lock = asyncio.Lock()
-
-managers = [EngineServiceManager(), EnvAppManager()]
 
 
 def generate_header():
@@ -35,6 +50,7 @@ first_write = True
 
 
 async def save_to_csv(data_generator):
+    print(csv_filename)
     global first_write
     async with csv_lock:
         with open(csv_filename, mode='a', newline='', buffering=1) as file:
