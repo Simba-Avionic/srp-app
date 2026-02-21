@@ -132,20 +132,29 @@ class EnvAppManager:
             await self.instance.close()
 
     def get_newtempevent_1(self):
-        print(self.newtempevent_1)
-        return self.newtempevent_1
+        if self.newtempevent_1 is None:
+            return None
+        return round(self.newtempevent_1 / 10, 1)
     
     def get_newtempevent_2(self):
-        return self.newtempevent_2
+        if self.newtempevent_2 is None:
+            return None
+        return round(self.newtempevent_2 / 10, 1)
     
     def get_newtempevent_3(self):
-        return self.newtempevent_3
+        if self.newtempevent_3 is None:
+            return None
+        return round(self.newtempevent_3 / 10, 1)
     
     def get_newpressevent(self):
-        return self.newpressevent
+        if self.newpressevent is None:
+            return None
+        return round(self.newpressevent / 100, 2)
     
     def get_newdpressevent(self):
-        return self.newdpressevent
+        if self.newdpressevent is None:
+            return None
+        return round(self.newdpressevent / 100, 2)
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()
