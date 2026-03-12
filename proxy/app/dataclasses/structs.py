@@ -20,9 +20,14 @@ class SysStatType:
         self.disk_utilization.value = float(json_obj['disk_utilization'])
 
     def deserialize(self, payload: bytes):
-        self.mem_usage.deserialize(payload[0:4])
-        self.cpu_usage.deserialize(payload[4:8])
-        self.disk_utilization.deserialize(payload[8:12])
+        # ECU wysyła 3 x float32 w little-endian
+        from struct import unpack
+        self.mem_usage.value, self.cpu_usage.value, self.disk_utilization.value = unpack(
+            "<fff", payload[:12]
+        )
+        self.mem_usage.value = round(self.mem_usage.value, 2)
+        self.cpu_usage.value = round(self.cpu_usage.value, 2)
+        self.disk_utilization.value = round(self.disk_utilization.value, 2)
 
 @dataclass
 class BME280DataStructure:
