@@ -57,7 +57,7 @@ class PrimerServiceManager:
         self.instance = await construct_client_service_instance(
             service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10271),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10282),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

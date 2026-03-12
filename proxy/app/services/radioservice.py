@@ -49,7 +49,7 @@ class RadioServiceManager:
         self.instance = await construct_client_service_instance(
             service=radioservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10279),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10291),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

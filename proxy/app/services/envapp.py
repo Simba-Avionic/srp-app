@@ -68,7 +68,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10272),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10283),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

@@ -11,14 +11,14 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.sysstatservice_dataclass import NewSystemUsageOut
+from proxy.app.dataclasses.fcsysstatservice_dataclass import NewSystemUsageOut
 
-class SysStatServiceManager:
+class FcSysStatServiceManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(SysStatServiceManager, cls).__new__(cls)
+            cls.__instance = super(FcSysStatServiceManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -44,17 +44,17 @@ class SysStatServiceManager:
             id=32769, event_ids=[32769]
         )
 
-        sysstatservice = (
+        fcsysstatservice = (
             ServiceBuilder()
-            .with_service_id(522)
+            .with_service_id(523)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=sysstatservice,
+            service=fcsysstatservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10284),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10289),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -80,8 +80,8 @@ class SysStatServiceManager:
     def get_newsystemusage(self):
         return self.newsystemusage
     
-async def initialize_sysstatservice(sd):
-    service_manager = SysStatServiceManager()
+async def initialize_fcsysstatservice(sd):
+    service_manager = FcSysStatServiceManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

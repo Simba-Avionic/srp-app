@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.fileloggerapp_dataclass import (StopOut, StartOut)
+from proxy.app.dataclasses.fileloggerapp_dataclass import (StartOut, StopOut)
 from proxy.app.services.fileloggerapp import FileLoggerAppManager
 from api.common import process_method_result
 

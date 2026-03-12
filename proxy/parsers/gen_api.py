@@ -10,6 +10,7 @@ from proxy.app.services.fileloggerapp import FileLoggerAppManager
 from proxy.app.services.recoveryservice import RecoveryServiceManager
 from proxy.app.services.sysstatservice import SysStatServiceManager
 from proxy.app.services.envappfc import EnvAppFcManager
+from proxy.app.services.fcsysstatservice import FcSysStatServiceManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -161,6 +162,7 @@ if __name__ == "__main__":
         RecoveryServiceManager,
         SysStatServiceManager,
         RecoveryServiceManager,
+        FcSysStatServiceManager,
     ]
 
     for ManagerClass in manager_classes:

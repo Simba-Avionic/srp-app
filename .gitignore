@@ -34,6 +34,14 @@
 *.log
 *.logs
 
+*.pyc
+__pycache__/
+__pycache__/*
+.idea/
+.idea/*
+.vscode/
+.vscode/*
+
 venv
 venv/
 .venv

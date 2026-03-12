@@ -100,6 +100,10 @@ from proxy.app.services.recoveryservice import initialize_recoveryservice
 from api.gpsservice.socketio import register_gpsservice_socketio
 from proxy.app.services.gpsservice import initialize_gpsservice
 
+#fcsysstatservice
+from api.fcsysstatservice.socketio import register_fcsysstatservice_socketio
+from proxy.app.services.fcsysstatservice import initialize_fcsysstatservice
+
 
 sio = AsyncServer(
     async_mode='asgi',
@@ -136,6 +140,7 @@ register_sysstatservice_socketio(sio)
 register_envappfc_socketio(sio)
 register_recoveryservice_socketio(sio)
 register_gpsservice_socketio(sio)
+register_fcsysstatservice_socketio(sio)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -213,6 +218,9 @@ async def run_recoveryservice_manager(sd):
 
 async def run_gpsservice_manager(sd):
     await initialize_gpsservice(sd)
+
+async def run_fcsysstatservice_manager(sd):
+    await initialize_fcsysstatservice(sd)
 
 if __name__ == '__main__':
     import uvicorn

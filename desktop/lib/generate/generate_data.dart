@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-void main() async {
-  String filePath = '/home/krzysztof/rocket_test/app/system_definition/someip/gps_service/service.json'; //pass here path, absolute path preferable
-
-  File file = File(filePath);
-  String jsonData = await file.readAsString();
-
+String processServiceFile(File file) {
+  String jsonData = file.readAsStringSync();
   var jsonMap = jsonDecode(jsonData);
 
   var serviceName = jsonMap['someip'].keys.first;
@@ -20,7 +16,7 @@ void main() async {
     "serviceId": serviceId,
   };
 
-  if (methods != null && methods.isNotEmpty) {
+  if (methods != null && (methods as Map).isNotEmpty) {
     serviceData["methods"] = methods.entries.map((entry) {
       return {
         "name": entry.key,
@@ -30,7 +26,7 @@ void main() async {
     }).toList();
   }
 
-  if (events != null && events.isNotEmpty) {
+  if (events != null && (events as Map).isNotEmpty) {
     serviceData["events"] = events.entries.map((entry) {
       return {
         "name": entry.key,
@@ -38,10 +34,30 @@ void main() async {
       };
     }).toList();
   }
+
   var encoder = const JsonEncoder.withIndent('  ');
   String prettyJson = encoder.convert(serviceData);
 
-  String serviceDataString = 'final Map<String, dynamic> $serviceName = $prettyJson;';
+  return 'final Map<String, dynamic> $serviceName = $prettyJson;';
+}
 
-  print(serviceDataString);
+void main() async {
+  String someipDir = '/home/krzysztof/rocket_test/app/system_definition/someip';
+
+  List<File> serviceFiles = Directory(someipDir)
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('service.json'))
+      .toList()
+    ..sort((a, b) => a.path.compareTo(b.path));
+
+  for (File file in serviceFiles) {
+    try {
+      String output = processServiceFile(file);
+      print(output);
+      print('');
+    } catch (e) {
+      stderr.writeln('Error processing ${file.path}: $e');
+    }
+  }
 }
