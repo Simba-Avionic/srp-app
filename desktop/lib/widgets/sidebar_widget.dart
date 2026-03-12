@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:desktop/main.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
+import 'package:path/path.dart' as p;
 
 import '../views/home.dart';
 import 'csv_data_screen.dart';
@@ -11,7 +12,7 @@ class Sidebar extends StatelessWidget {
 
   Future<List<List<dynamic>>> getCsvFileContent() async {
     final currentDir = Directory.current.path;
-    final filePath = '$currentDir/data/csv/data.csv';
+    final filePath = p.join(currentDir, 'desktop', 'data', 'csv', 'data.csv');
 
     final file = File(filePath);
     if (await file.exists()) {

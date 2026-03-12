@@ -8,6 +8,7 @@ from datetime import datetime
 
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
+from proxy.app.services.servoservice import ServoServiceManager
 
 # Get the project root directory (parent of 'api' directory)
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +23,7 @@ logger.info(f"CSV file will be saved to: {csv_filename}")
 
 csv_lock = asyncio.Lock()
 
-managers = [EngineServiceManager(), EnvAppManager()]
+managers = [EngineServiceManager(), EnvAppManager(), ServoServiceManager()]
 
 # Task tracking
 save_task = None
