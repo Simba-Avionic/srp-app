@@ -84,12 +84,10 @@ from api.primerservice.socketio import register_primerservice_socketio
 from proxy.app.services.primerservice import initialize_primerservice
 
 #sysstatservice
-from api.sysstatservice.router import router as sysstat_router
 from api.sysstatservice.socketio import register_sysstatservice_socketio
 from proxy.app.services.sysstatservice import initialize_sysstatservice
 
 #envappfc
-from api.envappfc.router import router as envappfc_router
 from api.envappfc.socketio import register_envappfc_socketio
 from proxy.app.services.envappfc import initialize_envappfc
 
@@ -99,7 +97,6 @@ from api.recoveryservice.socketio import register_recoveryservice_socketio
 from proxy.app.services.recoveryservice import initialize_recoveryservice
 
 #gpsservice
-from api.gpsservice.router import router as gps_router
 from api.gpsservice.socketio import register_gpsservice_socketio
 from proxy.app.services.gpsservice import initialize_gpsservice
 
@@ -129,10 +126,7 @@ app.include_router(save_router)
 app.include_router(servo_router)
 app.include_router(filelogger_router)
 app.include_router(primer_router)
-app.include_router(sysstat_router)
-app.include_router(envappfc_router)
 app.include_router(recovery_router)
-app.include_router(gps_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
