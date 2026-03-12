@@ -1,5 +1,4 @@
 
-
 import ipaddress
 import asyncio
 from loguru import logger
@@ -9,30 +8,17 @@ from someipy import (
     TransportLayerProtocol,
     ServiceBuilder, 
     SomeIpMessage,
-    EventGroup,
+    EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_1Out
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_2Out
-from proxy.app.dataclasses.envapp_dataclass import newTempEvent_3Out
-from proxy.app.dataclasses.envapp_dataclass import newPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import newDPressEventOut
-
-
-def _to_little_endian_int16(value: int) -> int:
-    """
-    Konwersja wartosci int16 sparsowanej jako BIG ENDIAN
-    na prawidlowe LITTLE ENDIAN.
-    """
-    # upewniamy sie, ze miescimy sie w zakresie int16
-    if value is None:
-        return None
-    # zamiana kolejnosci bajtow z big -> little i ponowne odczytanie jako signed
-    return int.from_bytes(
-        value.to_bytes(2, byteorder="big", signed=True),
-        byteorder="little",
-        signed=True,
-    )
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_1Out
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_2Out
+from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_3Out
+from proxy.app.dataclasses.envapp_dataclass import NewPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import NewDPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent1Out
+from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent2Out
+from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent3Out
 
 class EnvAppManager:
     __instance = None
@@ -52,6 +38,9 @@ class EnvAppManager:
             self.newtempevent_3 = None
             self.newpressevent = None
             self.newdpressevent = None
+            self.newboardtempevent1 = None
+            self.newboardtempevent2 = None
+            self.newboardtempevent3 = None
 
     async def find_service(self):
         try:
@@ -66,7 +55,7 @@ class EnvAppManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772]
+            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773, 32774, 32775, 32776]
         )
 
         envapp = (
@@ -79,7 +68,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10252),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10272),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -90,71 +79,90 @@ class EnvAppManager:
         self.service_discovery.attach(self.instance)
         
     def event_callback(self, someip_message: SomeIpMessage) -> None:
-        print(someip_message)
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    newTempEvent_1_msg = newTempEvent_1Out().deserialize(someip_message.payload)
-                    self.newtempevent_1 = _to_little_endian_int16(newTempEvent_1_msg.data.value)
+                    newTempEvent_1_msg = NewTempEvent_1Out().deserialize(someip_message.payload)
+                    self.newtempevent_1 = newTempEvent_1_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
-                    newTempEvent_2_msg = newTempEvent_2Out().deserialize(someip_message.payload)
-                    self.newtempevent_2 = _to_little_endian_int16(newTempEvent_2_msg.data.value)
+                    newTempEvent_2_msg = NewTempEvent_2Out().deserialize(someip_message.payload)
+                    self.newtempevent_2 = newTempEvent_2_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32771:
                 try:
-                    newTempEvent_3_msg = newTempEvent_3Out().deserialize(someip_message.payload)
-                    self.newtempevent_3 = _to_little_endian_int16(newTempEvent_3_msg.data.value)
+                    newTempEvent_3_msg = NewTempEvent_3Out().deserialize(someip_message.payload)
+                    self.newtempevent_3 = newTempEvent_3_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32772:
                 try:
-                    newPressEvent_msg = newPressEventOut().deserialize(someip_message.payload)
-                    self.newpressevent = _to_little_endian_int16(newPressEvent_msg.data.value)
+                    newPressEvent_msg = NewPressEventOut().deserialize(someip_message.payload)
+                    self.newpressevent = newPressEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32773:
                 try:
-                    newDPressEvent_msg = newDPressEventOut().deserialize(someip_message.payload)
-                    self.newdpressevent = _to_little_endian_int16(newDPressEvent_msg.data.value)
+                    newDPressEvent_msg = NewDPressEventOut().deserialize(someip_message.payload)
+                    self.newdpressevent = newDPressEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32774:
+                try:
+                    newBoardTempEvent1_msg = NewBoardTempEvent1Out().deserialize(someip_message.payload)
+                    self.newboardtempevent1 = newBoardTempEvent1_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32775:
+                try:
+                    newBoardTempEvent2_msg = NewBoardTempEvent2Out().deserialize(someip_message.payload)
+                    self.newboardtempevent2 = newBoardTempEvent2_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32776:
+                try:
+                    newBoardTempEvent3_msg = NewBoardTempEvent3Out().deserialize(someip_message.payload)
+                    self.newboardtempevent3 = newBoardTempEvent3_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
     
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
 
     def get_newtempevent_1(self):
-        if self.newtempevent_1 is None:
-            return None
-        return round(self.newtempevent_1 / 10, 1)
+        return self.newtempevent_1
     
     def get_newtempevent_2(self):
-        if self.newtempevent_2 is None:
-            return None
-        return round(self.newtempevent_2 / 10, 1)
+        return self.newtempevent_2
     
     def get_newtempevent_3(self):
-        if self.newtempevent_3 is None:
-            return None
-        return round(self.newtempevent_3 / 10, 1)
+        return self.newtempevent_3
     
     def get_newpressevent(self):
-        if self.newpressevent is None:
-            return None
-        return round(self.newpressevent / 100, 2)
+        return self.newpressevent
     
     def get_newdpressevent(self):
-        if self.newdpressevent is None:
-            return None
-        return round(self.newdpressevent / 100, 2)
+        return self.newdpressevent
+    
+    def get_newboardtempevent1(self):
+        return self.newboardtempevent1
+    
+    def get_newboardtempevent2(self):
+        return self.newboardtempevent2
+    
+    def get_newboardtempevent3(self):
+        return self.newboardtempevent3
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()
@@ -166,4 +174,3 @@ async def initialize_envapp(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-

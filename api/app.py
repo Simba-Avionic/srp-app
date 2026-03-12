@@ -83,6 +83,26 @@ from api.primerservice.router import router as primer_router
 from api.primerservice.socketio import register_primerservice_socketio
 from proxy.app.services.primerservice import initialize_primerservice
 
+#sysstatservice
+from api.sysstatservice.router import router as sysstat_router
+from api.sysstatservice.socketio import register_sysstatservice_socketio
+from proxy.app.services.sysstatservice import initialize_sysstatservice
+
+#envappfc
+from api.envappfc.router import router as envappfc_router
+from api.envappfc.socketio import register_envappfc_socketio
+from proxy.app.services.envappfc import initialize_envappfc
+
+#recoveryservice
+from api.recoveryservice.router import router as recovery_router
+from api.recoveryservice.socketio import register_recoveryservice_socketio
+from proxy.app.services.recoveryservice import initialize_recoveryservice
+
+#gpsservice
+from api.gpsservice.router import router as gps_router
+from api.gpsservice.socketio import register_gpsservice_socketio
+from proxy.app.services.gpsservice import initialize_gpsservice
+
 
 sio = AsyncServer(
     async_mode='asgi',
@@ -109,11 +129,19 @@ app.include_router(save_router)
 app.include_router(servo_router)
 app.include_router(filelogger_router)
 app.include_router(primer_router)
+app.include_router(sysstat_router)
+app.include_router(envappfc_router)
+app.include_router(recovery_router)
+app.include_router(gps_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
 register_envapp_socketio(sio)
 register_primerservice_socketio(sio)
+register_sysstatservice_socketio(sio)
+register_envappfc_socketio(sio)
+register_recoveryservice_socketio(sio)
+register_gpsservice_socketio(sio)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -144,7 +172,10 @@ async def lifespan(app: FastAPI):
     servo_task = asyncio.create_task(run_servo_service_manager(sd_instance))
     filelogger_task = asyncio.create_task(run_fileloggerapp_manager(sd_instance))
     primer_task = asyncio.create_task(run_primerservice_manager(sd_instance))
-
+    sysstat_task = asyncio.create_task(run_sysstatservice_manager(sd_instance))
+    envappfc_task = asyncio.create_task(run_envappfc_manager(sd_instance))
+    recovery_task = asyncio.create_task(run_recoveryservice_manager(sd_instance))
+    gps_task = asyncio.create_task(run_gpsservice_manager(sd_instance))
 
     yield
 
@@ -177,6 +208,17 @@ async def run_fileloggerapp_manager(sd):
 async def run_primerservice_manager(sd):
     await initialize_primerservice(sd)
 
+async def run_sysstatservice_manager(sd):
+    await initialize_sysstatservice(sd)
+
+async def run_envappfc_manager(sd):
+    await initialize_envappfc(sd)
+
+async def run_recoveryservice_manager(sd):
+    await initialize_recoveryservice(sd)
+
+async def run_gpsservice_manager(sd):
+    await initialize_gpsservice(sd)
 
 if __name__ == '__main__':
     import uvicorn

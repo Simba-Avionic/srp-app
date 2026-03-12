@@ -6,12 +6,12 @@ from someipy.serialization import (
 )
 
 @dataclass
-class StartIn(SomeIpPayload):
+class OpenReefedParachuteIn(SomeIpPayload):
     data: bytes = b''
 
 
 @dataclass
-class StartOut(SomeIpPayload):
+class OpenReefedParachuteOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -21,12 +21,12 @@ class StartOut(SomeIpPayload):
 
 
 @dataclass
-class StopIn(SomeIpPayload):
+class UnreefeParachuteIn(SomeIpPayload):
     data: bytes = b''
 
 
 @dataclass
-class StopOut(SomeIpPayload):
+class UnreefeParachuteOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -36,7 +36,7 @@ class StopOut(SomeIpPayload):
 
 
 @dataclass
-class LoggingStateOut(SomeIpPayload):
+class NewParachuteStatusEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()

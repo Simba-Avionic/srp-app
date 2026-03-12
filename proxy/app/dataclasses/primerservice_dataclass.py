@@ -2,88 +2,59 @@ from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
     Bool,
-    Uint8
+    Uint8,
 )
-
 
 @dataclass
 class OnPrimeIn(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+    data: bytes = b''
 
 
 @dataclass
 class OnPrimeOut(SomeIpPayload):
     data: Bool
-
     def __init__(self):
         self.data = Bool()
 
     def from_json(self, json_argument):
-         self.data.value = bool(json_argument)
-
+        self.data.value = bool(json_argument)
 
 
 @dataclass
 class OffPrimeIn(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+    data: bytes = b''
 
 
 @dataclass
 class OffPrimeOut(SomeIpPayload):
     data: Bool
-
     def __init__(self):
         self.data = Bool()
 
     def from_json(self, json_argument):
-         self.data.value = bool(json_argument)
-
+        self.data.value = bool(json_argument)
 
 
 @dataclass
 class StartPrimeIn(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+    data: bytes = b''
 
 
 @dataclass
 class StartPrimeOut(SomeIpPayload):
     data: Bool
-
     def __init__(self):
         self.data = Bool()
 
     def from_json(self, json_argument):
-         self.data.value = bool(json_argument)
-
-
-
-@dataclass
-class primeStatusEventIn(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+        self.data.value = bool(json_argument)
 
 
 @dataclass
-class primeStatusEventOut(SomeIpPayload):
+class PrimeStatusEventOut(SomeIpPayload):
     data: Uint8
-
     def __init__(self):
         self.data = Uint8()
 
     def from_json(self, json_argument):
-         self.data.value = int(json_argument)
+        self.data.value = int(json_argument)

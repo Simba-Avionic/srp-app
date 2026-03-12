@@ -1,5 +1,4 @@
 
-
 import ipaddress
 import asyncio
 from loguru import logger
@@ -14,10 +13,13 @@ from someipy import (
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.servoservice_dataclass import ServoStatusEventOut
 from proxy.app.dataclasses.servoservice_dataclass import ServoVentStatusEventOut
+from proxy.app.dataclasses.servoservice_dataclass import ServoDumpStatusEventOut
 from proxy.app.dataclasses.servoservice_dataclass import SetMainServoValueIn
 from proxy.app.dataclasses.servoservice_dataclass import ReadMainServoValueIn
 from proxy.app.dataclasses.servoservice_dataclass import SetVentServoValueIn
 from proxy.app.dataclasses.servoservice_dataclass import ReadVentServoValueIn
+from proxy.app.dataclasses.servoservice_dataclass import SetDumpValueIn
+from proxy.app.dataclasses.servoservice_dataclass import ReadDumpValueIn
 
 class ServoServiceManager:
     __instance = None
@@ -34,6 +36,7 @@ class ServoServiceManager:
             self.instance = None
             self.servostatusevent = None
             self.servoventstatusevent = None
+            self.servodumpstatusevent = None
 
     async def find_service(self):
         try:
@@ -48,7 +51,7 @@ class ServoServiceManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770]
+            id=32769, event_ids=[32769, 32770, 32771]
         )
 
         servoservice = (
@@ -61,7 +64,7 @@ class ServoServiceManager:
         self.instance = await construct_client_service_instance(
             service=servoservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10255),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10276),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -78,14 +81,21 @@ class ServoServiceManager:
                     ServoStatusEvent_msg = ServoStatusEventOut().deserialize(someip_message.payload)
                     self.servostatusevent = ServoStatusEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
                     ServoVentStatusEvent_msg = ServoVentStatusEventOut().deserialize(someip_message.payload)
                     self.servoventstatusevent = ServoVentStatusEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32771:
+                try:
+                    ServoDumpStatusEvent_msg = ServoDumpStatusEventOut().deserialize(someip_message.payload)
+                    self.servodumpstatusevent = ServoDumpStatusEvent_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
     
     async def shutdown(self):
         if self.instance:
@@ -96,6 +106,9 @@ class ServoServiceManager:
     
     def get_servoventstatusevent(self):
         return self.servoventstatusevent
+    
+    def get_servodumpstatusevent(self):
+        return self.servodumpstatusevent
     
     async def SetMainServoValue(self, setmainservovalue):
         await self.find_service()
@@ -133,6 +146,24 @@ class ServoServiceManager:
     
         return method_result
     
+    async def SetDumpValue(self, setdumpvalue):
+        await self.find_service()
+        setdumpvalue_msg = SetDumpValueIn()
+        setdumpvalue_msg.from_json(setdumpvalue)
+        method_result = await self.instance.call_method(
+            5, setdumpvalue_msg.serialize()
+        )
+    
+        return method_result
+    
+    async def ReadDumpValue(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            6, b''
+        )
+    
+        return method_result
+    
 async def initialize_servoservice(sd):
     service_manager = ServoServiceManager()
     service_manager.assign_service_discovery(sd)
@@ -143,4 +174,3 @@ async def initialize_servoservice(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-

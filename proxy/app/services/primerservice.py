@@ -1,5 +1,4 @@
 
-
 import ipaddress
 import asyncio
 from loguru import logger
@@ -7,12 +6,12 @@ from loguru import logger
 from someipy import (
     construct_client_service_instance,
     TransportLayerProtocol,
-    ServiceBuilder,
+    ServiceBuilder, 
     SomeIpMessage,
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.primerservice_dataclass import primeStatusEventOut
+from proxy.app.dataclasses.primerservice_dataclass import PrimeStatusEventOut
 from proxy.app.dataclasses.primerservice_dataclass import OnPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import OffPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import StartPrimeIn
@@ -43,7 +42,7 @@ class PrimerServiceManager:
     def assign_service_discovery(self, new_sd):
         self.service_discovery = new_sd
 
-    async def setup_manager(self) -> None:
+    async def setup_manager(self) -> None:            
         event_group = EventGroup(
             id=32769, event_ids=[32769]
         )
@@ -58,7 +57,7 @@ class PrimerServiceManager:
         self.instance = await construct_client_service_instance(
             service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10259),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10271),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -67,47 +66,47 @@ class PrimerServiceManager:
         self.instance.register_callback(self.event_callback)
         self.instance.subscribe_eventgroup(event_group.id)
         self.service_discovery.attach(self.instance)
-
+        
     def event_callback(self, someip_message: SomeIpMessage) -> None:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    primeStatusEvent_msg = primeStatusEventOut().deserialize(someip_message.payload)
+                    primeStatusEvent_msg = PrimeStatusEventOut().deserialize(someip_message.payload)
                     self.primestatusevent = primeStatusEvent_msg.data.value
                 except Exception as e:
-                    logger.exception("Error in deserialization: {}", e)
-
+                    logger.exception(f"Error in deserialization: {e}")
+    
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
 
     def get_primestatusevent(self):
         return self.primestatusevent
-
+    
     async def OnPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
             1, b''
         )
-
+    
         return method_result
-
+    
     async def OffPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
             2, b''
         )
-
+    
         return method_result
-
+    
     async def StartPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
             3, b''
         )
-
+    
         return method_result
-
+    
 async def initialize_primerservice(sd):
     service_manager = PrimerServiceManager()
     service_manager.assign_service_discovery(sd)
@@ -118,4 +117,3 @@ async def initialize_primerservice(sd):
         logger.info("Shutting down...")
     finally:
         await service_manager.shutdown()
-

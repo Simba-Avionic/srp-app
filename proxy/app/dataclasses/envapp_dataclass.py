@@ -1,108 +1,85 @@
 from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
-    Sint16
+    Sint16,
+    Uint16,
 )
-from loguru import logger
 
 @dataclass
-class newTempEvent_1In(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
-
-
-@dataclass
-class newTempEvent_1Out(SomeIpPayload):
+class NewTempEvent_1Out(SomeIpPayload):
     data: Sint16
-
-    def __init__(self):
-        self.data = Sint16()
-    def from_json(self, json_argument):
-         self.data.value = int(json_argument)
-
-
-
-@dataclass
-class newTempEvent_2In(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
-
-
-@dataclass
-class newTempEvent_2Out(SomeIpPayload):
-    data: Sint16
-
     def __init__(self):
         self.data = Sint16()
 
     def from_json(self, json_argument):
-         self.data.value = int(json_argument)
-
-
-
-@dataclass
-class newTempEvent_3In(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+        self.data.value = int(json_argument)
 
 
 @dataclass
-class newTempEvent_3Out(SomeIpPayload):
+class NewTempEvent_2Out(SomeIpPayload):
     data: Sint16
-
     def __init__(self):
         self.data = Sint16()
 
     def from_json(self, json_argument):
-         self.data.value = int(json_argument)
-
-
-
-@dataclass
-class newPressEventIn(SomeIpPayload):
-    data: bytes
-
-    def __init__(self):
-        self.data = b''
-
+        self.data.value = int(json_argument)
 
 
 @dataclass
-class newPressEventOut(SomeIpPayload):
+class NewTempEvent_3Out(SomeIpPayload):
     data: Sint16
-
     def __init__(self):
         self.data = Sint16()
 
     def from_json(self, json_argument):
-         self.data.value = int(json_argument)
-
+        self.data.value = int(json_argument)
 
 
 @dataclass
-class newDPressEventIn(SomeIpPayload):
-    data: bytes
-
+class NewPressEventOut(SomeIpPayload):
+    data: Uint16
     def __init__(self):
-        self.data = b''
+        self.data = Uint16()
 
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
 
 
 @dataclass
-class newDPressEventOut(SomeIpPayload):
-    data: Sint16
+class NewDPressEventOut(SomeIpPayload):
+    data: Uint16
+    def __init__(self):
+        self.data = Uint16()
 
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewBoardTempEvent1Out(SomeIpPayload):
+    data: Sint16
     def __init__(self):
         self.data = Sint16()
 
     def from_json(self, json_argument):
-         self.data.value = int(json_argument)
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewBoardTempEvent2Out(SomeIpPayload):
+    data: Sint16
+    def __init__(self):
+        self.data = Sint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewBoardTempEvent3Out(SomeIpPayload):
+    data: Sint16
+    def __init__(self):
+        self.data = Sint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)

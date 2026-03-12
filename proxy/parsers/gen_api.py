@@ -4,6 +4,12 @@ from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
 from proxy.app.services.servoservice import ServoServiceManager
 from proxy.app.services.primerservice import PrimerServiceManager
+from proxy.app.services.gpsservice import GPSServiceManager
+from proxy.app.services.mainservice import MainServiceManager
+from proxy.app.services.fileloggerapp import FileLoggerAppManager
+from proxy.app.services.recoveryservice import RecoveryServiceManager
+from proxy.app.services.sysstatservice import SysStatServiceManager
+from proxy.app.services.envappfc import EnvAppFcManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -143,5 +149,20 @@ def generate_service_code(manager):
 
 
 if __name__ == "__main__":
-    manager = PrimerServiceManager()
-    generate_service_code(manager)
+    manager_classes = [
+        EngineServiceManager,
+        EnvAppManager,
+        EnvAppFcManager,
+        ServoServiceManager,
+        PrimerServiceManager,
+        GPSServiceManager,
+        MainServiceManager,
+        FileLoggerAppManager,
+        RecoveryServiceManager,
+        SysStatServiceManager,
+        RecoveryServiceManager,
+    ]
+
+    for ManagerClass in manager_classes:
+        manager_instance = ManagerClass()
+        generate_service_code(manager_instance)

@@ -15,13 +15,12 @@ router = APIRouter(
 @router.post("/start")
 async def start(data: dict = Body(...)):
     try:
-        logger.info("fileloggerapp.start called with body: {}", data)
         service_manager = FileLoggerAppManager()
         params = data or {}
         method_result = await service_manager.Start(**params)
         return process_method_result(method_result, deserialization_class=StartOut)
     except Exception as e:
-        logger.exception("Error in fileloggerapp.start: {}", e)
+        logger.exception("Error in start handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
@@ -30,13 +29,12 @@ async def start(data: dict = Body(...)):
 @router.post("/stop")
 async def stop(data: dict = Body(...)):
     try:
-        logger.info("fileloggerapp.stop called with body: {}", data)
         service_manager = FileLoggerAppManager()
         params = data or {}
         method_result = await service_manager.Stop(**params)
         return process_method_result(method_result, deserialization_class=StopOut)
     except Exception as e:
-        logger.exception("Error in fileloggerapp.stop: {}", e)
+        logger.exception("Error in stop handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

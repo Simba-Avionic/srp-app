@@ -57,6 +57,35 @@ class Home extends StatelessWidget {
       ]
     };
 
+    final Map<String, dynamic> GPSService = {
+      "serviceName": "GPSService",
+      "serviceId": 519,
+      "events": [
+        {"name": "GPSStatusEvent", "id": 32769}
+      ]
+    };
+    final Map<String, dynamic> SysStatService = {
+      "serviceName": "SysStatService",
+      "serviceId": 520,
+      "events": [
+        {"name": "SystemUsage", "id": 32769}
+      ]
+    };
+    final Map<String, dynamic> EnvAppFc = {
+      "serviceName": "EnvAppFc",
+      "serviceId": 521,
+      "events": [
+        {"name": "BoardTempEvent", "id": 32769}
+      ]
+    };
+    final Map<String, dynamic> RecoveryService = {
+      "serviceName": "RecoveryService",
+      "serviceId": 522,
+      "events": [
+        {"name": "RecoveryStatusEvent", "id": 32769}
+      ]
+    };
+
     final Map<String, dynamic> FileLoggerApp = {
       "serviceName": "FileLoggerApp",
       "serviceId": 517,
@@ -72,6 +101,10 @@ class Home extends StatelessWidget {
       FileLoggerApp,
       PrimerService,
       EngineService,
+      SysStatService,
+      EnvAppFc,
+      RecoveryService,
+      GPSService,
     ];
 
     return Container(
