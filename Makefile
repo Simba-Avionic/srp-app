@@ -1,10 +1,7 @@
-.PHONY: clean build update-deps run-all run-proxy run-desktop
+.PHONY: clean update-deps run-all run-proxy run-desktop
 
 clean:
 	rm -rf desktop/build/*
-
-build:
-
 
 update-deps:
 	echo "Updating python packages..."
