@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.servoservice_dataclass import (SetVentServoValueOut, ReadDumpValueOut, ReadVentServoValueOut, ReadMainServoValueOut, SetDumpValueOut, SetMainServoValueOut)
+from proxy.app.dataclasses.servoservice_dataclass import (ReadMainServoValueOut, SetVentServoValueOut, ReadDumpValueOut, SetDumpValueOut, ReadVentServoValueOut, SetMainServoValueOut)
 from proxy.app.services.servoservice import ServoServiceManager
 from api.common import process_method_result
 

@@ -89,6 +89,10 @@ class Home extends StatelessWidget {
           "name": "newBME280Event",
           "id": 32772
         }
+        {
+          "name": "newTensoEvent",
+          "id": 32777
+        }
       ]
     };
 

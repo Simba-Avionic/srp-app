@@ -60,7 +60,7 @@ class EnvAppFcManager:
         self.instance = await construct_client_service_instance(
             service=envappfc,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10288),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10300),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

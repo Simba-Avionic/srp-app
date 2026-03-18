@@ -146,3 +146,19 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
     
+    @sio.on('newtensoevent', namespace=namespace)
+    async def get_newtensoevent(sid, data):
+        try:
+            manager = EnvAppManager()
+            response = manager.get_newtensoevent()
+            await sio.emit('newtensoevent', 
+                          {'event_name': 'newtensoevent', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            logger.exception("Error handling event newtensoevent: %s", e)
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    

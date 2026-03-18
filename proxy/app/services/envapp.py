@@ -19,6 +19,7 @@ from proxy.app.dataclasses.envapp_dataclass import NewDPressEventOut
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent1Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent2Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent3Out
+from proxy.app.dataclasses.envapp_dataclass import NewTensoEventOut
 
 class EnvAppManager:
     __instance = None
@@ -41,6 +42,7 @@ class EnvAppManager:
             self.newboardtempevent1 = None
             self.newboardtempevent2 = None
             self.newboardtempevent3 = None
+            self.newtensoevent = None
 
     async def find_service(self):
         try:
@@ -55,7 +57,7 @@ class EnvAppManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773, 32774, 32775, 32776]
+            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773, 32774, 32775, 32776, 32777]
         )
 
         envapp = (
@@ -68,7 +70,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10283),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10295),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -136,6 +138,13 @@ class EnvAppManager:
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
+            case 32777:
+                try:
+                    newTensoEvent_msg = NewTensoEventOut().deserialize(someip_message.payload)
+                    self.newtensoevent = newTensoEvent_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
@@ -163,6 +172,9 @@ class EnvAppManager:
     
     def get_newboardtempevent3(self):
         return self.newboardtempevent3
+    
+    def get_newtensoevent(self):
+        return self.newtensoevent
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()
