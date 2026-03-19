@@ -66,6 +66,10 @@ class Home extends StatelessWidget {
           "name": "newBoardTempEvent3",
           "id": 32776
         }
+        {
+          "name": "newTensoEvent",
+          "id": 32777
+        }
       ]
     };
 
@@ -88,10 +92,6 @@ class Home extends StatelessWidget {
         {
           "name": "newBME280Event",
           "id": 32772
-        }
-        {
-          "name": "newTensoEvent",
-          "id": 32777
         }
       ]
     };
