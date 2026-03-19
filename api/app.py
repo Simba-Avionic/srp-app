@@ -71,6 +71,7 @@ from proxy.app.services.envapp import initialize_envapp
 
 # file logger
 from api.fileloggerapp.router import router as filelogger_router
+from api.fileloggerapp.socketio import register_fileloggerapp_socketio
 from proxy.app.services.fileloggerapp import initialize_fileloggerapp
 
 # servo
@@ -140,6 +141,7 @@ register_sysstatservice_socketio(sio)
 register_envappfc_socketio(sio)
 register_recoveryservice_socketio(sio)
 register_gpsservice_socketio(sio)
+register_fileloggerapp_socketio(sio)
 register_fcsysstatservice_socketio(sio)
 
 @app.middleware("http")
