@@ -65,7 +65,7 @@ class Home extends StatelessWidget {
         {
           "name": "newBoardTempEvent3",
           "id": 32776
-        }
+        },
         {
           "name": "newTensoEvent",
           "id": 32777
