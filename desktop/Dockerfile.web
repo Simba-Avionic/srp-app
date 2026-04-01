@@ -1,0 +1,19 @@
+FROM ghcr.io/cirruslabs/flutter:stable AS build
+
+WORKDIR /src
+COPY . /src
+
+WORKDIR /src/desktop
+ENV SYSTEM_DEFINITION_ROOT=/src/system_definition/someip
+RUN flutter pub get
+RUN dart run lib/generate/generate_data.dart
+RUN flutter build web --release
+
+FROM nginx:alpine
+
+COPY desktop/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /src/desktop/build/web /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

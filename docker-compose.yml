@@ -1,0 +1,21 @@
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    # Host network is required for SOME/IP multicast discovery.
+    # Note: works natively on Linux Docker Engine.
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  desktop:
+    build:
+      context: .
+      dockerfile: desktop/Dockerfile.web
+    depends_on:
+      - proxy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
