@@ -287,6 +287,7 @@ class Home extends StatelessWidget {
       RecoveryService,
       GPSService,
       FcSysStatService,
+      MainService
     ];
 
     return Container(
@@ -295,7 +296,7 @@ class Home extends StatelessWidget {
       child: MasonryGridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
+        crossAxisCount: 3,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
         itemCount: services.length,

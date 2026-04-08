@@ -22,7 +22,7 @@ loguru_logger.add(
     logs_path,
     rotation="2 GB",
     compression="zip",
-    level="INFO",
+    level="ERROR",
     enqueue=True,
     backtrace=True,
     diagnose=False
@@ -105,6 +105,11 @@ from proxy.app.services.gpsservice import initialize_gpsservice
 from api.fcsysstatservice.socketio import register_fcsysstatservice_socketio
 from proxy.app.services.fcsysstatservice import initialize_fcsysstatservice
 
+# mainservice
+from api.mainservice.socketio import register_mainservice_socketio
+from api.mainservice.router import router as mainservice_router
+from proxy.app.services.mainservice import initialize_mainservice
+
 
 sio = AsyncServer(
     async_mode='asgi',
@@ -132,6 +137,7 @@ app.include_router(servo_router)
 app.include_router(filelogger_router)
 app.include_router(primer_router)
 app.include_router(recovery_router)
+app.include_router(mainservice_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
@@ -143,6 +149,7 @@ register_recoveryservice_socketio(sio)
 register_gpsservice_socketio(sio)
 register_fileloggerapp_socketio(sio)
 register_fcsysstatservice_socketio(sio)
+register_mainservice_socketio(sio)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -177,13 +184,16 @@ async def lifespan(app: FastAPI):
     envappfc_task = asyncio.create_task(run_envappfc_manager(sd_instance))
     recovery_task = asyncio.create_task(run_recoveryservice_manager(sd_instance))
     gps_task = asyncio.create_task(run_gpsservice_manager(sd_instance))
+    mainserivce_task = asyncio.create_task(run_mainservice_manager(sd_instance))
+    fcservice_task = asyncio.create_task(run_fcsysstatservice_manager(sd_instance))
+
 
     yield
 
     # graceful shutdown
-    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
+    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task, sysstat_task, envappfc_task, gps_task, recovery_task, mainserivce_task, fcservice_task):
         t.cancel()
-    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task):
+    for t in (engine_task, env_task, servo_task, filelogger_task, primer_task, sysstat_task, envappfc_task, gps_task, recovery_task, mainserivce_task, fcservice_task):
         try:
             await t
         except asyncio.CancelledError:
@@ -220,6 +230,9 @@ async def run_recoveryservice_manager(sd):
 
 async def run_gpsservice_manager(sd):
     await initialize_gpsservice(sd)
+
+async def run_mainservice_manager(sd):
+    await initialize_mainservice(sd)
 
 async def run_fcsysstatservice_manager(sd):
     await initialize_fcsysstatservice(sd)

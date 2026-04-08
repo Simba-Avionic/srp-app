@@ -15,6 +15,7 @@ from proxy.app.services.recoveryservice import RecoveryServiceManager
 from proxy.app.services.gpsservice import GPSServiceManager
 from proxy.app.services.primerservice import PrimerServiceManager
 from proxy.app.services.fcsysstatservice import FcSysStatServiceManager
+from proxy.app.services.mainservice import MainServiceManager
 
 # Get the project root directory (parent of 'api' directory)
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +30,7 @@ logger.info(f"CSV file will be saved to: {csv_filename}")
 
 csv_lock = asyncio.Lock()
 
-managers = [EngineServiceManager(), EnvAppManager(), ServoServiceManager(), SysStatServiceManager(), EnvAppFcManager(), RecoveryServiceManager(), GPSServiceManager(), PrimerServiceManager(), FcSysStatServiceManager()]
+managers = [EngineServiceManager(), EnvAppManager(), ServoServiceManager(), SysStatServiceManager(), EnvAppFcManager(), RecoveryServiceManager(), GPSServiceManager(), PrimerServiceManager(), FcSysStatServiceManager(), MainServiceManager()]
 
 # Task tracking
 save_task = None

@@ -83,7 +83,7 @@ class MainServiceManager:
     
     async def SetMode(self, setmode):
         await self.find_service()
-        setmode_msg = setModeIn()
+        setmode_msg = SetModeIn()
         setmode_msg.from_json(setmode)
         method_result = await self.instance.call_method(
             1, setmode_msg.serialize()
