@@ -10,6 +10,8 @@ update-deps:
 	cd desktop && flutter pub upgrade && flutter build linux
 
 run-all:
+	mkdir -p desktop/data/csv
+	chmod u+rwx desktop/data/csv
 	$(MAKE) -j 2 run-proxy run-desktop
 
 run-proxy:
