@@ -34,3 +34,35 @@ def register_engineservice_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
     
+    @sio.on('newhbstatus', namespace=namespace)
+    async def get_newhbstatus(sid, data):
+        try:
+            manager = EngineServiceManager()
+            response = manager.get_newhbstatus()
+            await sio.emit('newhbstatus', 
+                          {'event_name': 'newhbstatus', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            logger.exception("Error handling event newhbstatus: %s", e)
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    
+    @sio.on('newventvalvestatus', namespace=namespace)
+    async def get_newventvalvestatus(sid, data):
+        try:
+            manager = EngineServiceManager()
+            response = manager.get_newventvalvestatus()
+            await sio.emit('newventvalvestatus', 
+                          {'event_name': 'newventvalvestatus', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            logger.exception("Error handling event newventvalvestatus: %s", e)
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    

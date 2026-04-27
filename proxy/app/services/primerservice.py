@@ -15,6 +15,7 @@ from proxy.app.dataclasses.primerservice_dataclass import PrimeStatusEventOut
 from proxy.app.dataclasses.primerservice_dataclass import OnPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import OffPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import StartPrimeIn
+from proxy.app.dataclasses.primerservice_dataclass import GetPrimerStateIn
 
 class PrimerServiceManager:
     __instance = None
@@ -57,7 +58,7 @@ class PrimerServiceManager:
         self.instance = await construct_client_service_instance(
             service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10294),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10306),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -103,6 +104,14 @@ class PrimerServiceManager:
         await self.find_service()
         method_result = await self.instance.call_method(
             3, b''
+        )
+    
+        return method_result
+    
+    async def GetPrimerState(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            4, b''
         )
     
         return method_result

@@ -3,14 +3,14 @@ from someipy.serialization import (
     SomeIpPayload,
 )
 from .structs import (
-    SysStatType,
+    FcSysStatType,
 )
 
 @dataclass
 class NewSystemUsageOut(SomeIpPayload):
-    data: SysStatType
+    data: FcSysStatType
     def __init__(self):
-        self.data = SysStatType()
+        self.data = FcSysStatType()
 
     def from_json(self, json_argument):
         self.data.from_json(json_argument)

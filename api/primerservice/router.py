@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.primerservice_dataclass import (OnPrimeOut, OffPrimeOut, StartPrimeOut)
+from proxy.app.dataclasses.primerservice_dataclass import (GetPrimerStateOut, OffPrimeOut, OnPrimeOut, StartPrimeOut)
 from proxy.app.services.primerservice import PrimerServiceManager
 from api.common import process_method_result
 
@@ -11,6 +11,20 @@ router = APIRouter(
     tags=["primerservice"]
 )
 
+
+@router.post("/getprimerstate")
+async def getprimerstate(data: dict = Body(...)):
+    try:
+        service_manager = PrimerServiceManager()
+        params = data or {}
+        method_result = await service_manager.GetPrimerState(**params)
+        return process_method_result(method_result, deserialization_class=GetPrimerStateOut)
+    except Exception as e:
+        logger.exception("Error in getprimerstate handler: %s", e)
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
 @router.post("/offprime")
 async def offprime(data: dict = Body(...)):

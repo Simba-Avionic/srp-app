@@ -55,7 +55,7 @@ class MainServiceManager:
         self.instance = await construct_client_service_instance(
             service=mainservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10305),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10318),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

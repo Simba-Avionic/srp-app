@@ -20,12 +20,30 @@ class Home extends StatelessWidget {
           "name": "SetMode",
           "id": 2,
           "in_type": "uint8"
+        },
+        {
+          "name": "GetMode",
+          "id": 3,
+          "in_type": "void"
+        },
+        {
+          "name": "SetVentValve",
+          "id": 4,
+          "in_type": "uint8"
         }
       ],
       "events": [
         {
           "name": "CurrentMode",
           "id": 32769
+        },
+        {
+          "name": "NewVentValveStatus",
+          "id": 32770
+        },
+        {
+          "name": "NewHBStatus",
+          "id": 32771
         }
       ]
     };
@@ -33,6 +51,23 @@ class Home extends StatelessWidget {
     final Map<String, dynamic> EnvApp = {
       "serviceName": "EnvApp",
       "serviceId": 514,
+      "methods": [
+        {
+          "name": "GetTankPressure",
+          "id": 1,
+          "in_type": "void"
+        },
+        {
+          "name": "GetUpperTankTemp",
+          "id": 2,
+          "in_type": "void"
+        },
+        {
+          "name": "GetLowerTankTemp",
+          "id": 3,
+          "in_type": "void"
+        }
+      ],
       "events": [
         {
           "name": "newTempEvent_1",
@@ -107,6 +142,29 @@ class Home extends StatelessWidget {
       ]
     };
 
+    final Map<String, dynamic> FcFileLoggerApp = {
+      "serviceName": "FcFileLoggerApp",
+      "serviceId": 531,
+      "methods": [
+        {
+          "name": "Start",
+          "id": 1,
+          "in_type": "void"
+        },
+        {
+          "name": "Stop",
+          "id": 2,
+          "in_type": "void"
+        }
+      ],
+      "events": [
+        {
+          "name": "LoggingState",
+          "id": 32769
+        }
+      ]
+    };
+
     final Map<String, dynamic> MainService = {
       "serviceName": "MainService",
       "serviceId": 521,
@@ -127,7 +185,13 @@ class Home extends StatelessWidget {
 
     final Map<String, dynamic> RadioService = {
       "serviceName": "RadioService",
-      "serviceId": 530
+      "serviceId": 530,
+      "events": [
+        {
+          "name": "RadioStatusEvent",
+          "id": 32769
+        }
+      ]
     };
 
     final Map<String, dynamic> RecoveryService = {
@@ -205,6 +269,11 @@ class Home extends StatelessWidget {
           "name": "StartPrime",
           "id": 3,
           "in_type": "void"
+        },
+        {
+          "name": "GetPrimerState",
+          "id": 4,
+          "in_type": "void"
         }
       ],
       "events": [
@@ -276,6 +345,7 @@ class Home extends StatelessWidget {
         }
       ]
     };
+
     final services = [
       EnvApp,
       ServoService,
@@ -287,7 +357,8 @@ class Home extends StatelessWidget {
       RecoveryService,
       GPSService,
       FcSysStatService,
-      MainService
+      MainService,
+      FcFileLoggerApp
     ];
 
     return Container(

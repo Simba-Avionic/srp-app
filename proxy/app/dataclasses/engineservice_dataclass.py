@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
     Bool,
+    Uint16,
     Uint8,
 )
 
@@ -41,10 +42,60 @@ class SetModeOut(SomeIpPayload):
 
 
 @dataclass
+class GetModeIn(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
+class GetModeOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class SetVentValveIn(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class SetVentValveOut(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
 class CurrentModeOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewVentValveStatusOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewHBStatusOut(SomeIpPayload):
+    data: Uint16
+    def __init__(self):
+        self.data = Uint16()
 
     def from_json(self, json_argument):
         self.data.value = int(json_argument)

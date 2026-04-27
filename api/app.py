@@ -110,6 +110,11 @@ from api.mainservice.socketio import register_mainservice_socketio
 from api.mainservice.router import router as mainservice_router
 from proxy.app.services.mainservice import initialize_mainservice
 
+# fcfilelogger
+from api.fcfileloggerapp.socketio import register_fcfileloggerapp_socketio
+from api.fcfileloggerapp.router import router as fcfilelogger_router
+from proxy.app.services.fcfileloggerapp import initialize_fcfileloggerapp
+
 
 sio = AsyncServer(
     async_mode='asgi',
@@ -138,6 +143,7 @@ app.include_router(filelogger_router)
 app.include_router(primer_router)
 app.include_router(recovery_router)
 app.include_router(mainservice_router)
+app.include_router(fcfilelogger_router)
 
 register_servoservice_socketio(sio)
 register_engineservice_socketio(sio)
@@ -150,6 +156,7 @@ register_gpsservice_socketio(sio)
 register_fileloggerapp_socketio(sio)
 register_fcsysstatservice_socketio(sio)
 register_mainservice_socketio(sio)
+register_fcfileloggerapp_socketio(sio)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -186,6 +193,7 @@ async def lifespan(app: FastAPI):
     gps_task = asyncio.create_task(run_gpsservice_manager(sd_instance))
     mainserivce_task = asyncio.create_task(run_mainservice_manager(sd_instance))
     fcservice_task = asyncio.create_task(run_fcsysstatservice_manager(sd_instance))
+    fcfilelogger_task = asyncio.create_task(run_fcsysstatservice_manager(sd_instance))
 
 
     yield
@@ -236,6 +244,9 @@ async def run_mainservice_manager(sd):
 
 async def run_fcsysstatservice_manager(sd):
     await initialize_fcsysstatservice(sd)
+
+async def fc_fileloggerservice_manager(sd):
+    await initialize_fcfileloggerapp(sd)
 
 if __name__ == '__main__':
     import uvicorn
