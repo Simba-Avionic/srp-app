@@ -54,7 +54,7 @@ class GPSServiceManager:
         self.instance = await construct_client_service_instance(
             service=gpsservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10304),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10317),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,

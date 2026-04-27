@@ -51,6 +51,21 @@ class StartPrimeOut(SomeIpPayload):
 
 
 @dataclass
+class GetPrimerStateIn(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
+class GetPrimerStateOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
 class PrimeStatusEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):

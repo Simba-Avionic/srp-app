@@ -20,6 +20,9 @@ from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent1Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent2Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent3Out
 from proxy.app.dataclasses.envapp_dataclass import NewTensoEventOut
+from proxy.app.dataclasses.envapp_dataclass import GetTankPressureIn
+from proxy.app.dataclasses.envapp_dataclass import GetUpperTankTempIn
+from proxy.app.dataclasses.envapp_dataclass import GetLowerTankTempIn
 
 class EnvAppManager:
     __instance = None
@@ -70,7 +73,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10295),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10307),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -175,6 +178,30 @@ class EnvAppManager:
     
     def get_newtensoevent(self):
         return self.newtensoevent
+    
+    async def GetTankPressure(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            1, b''
+        )
+    
+        return method_result
+    
+    async def GetUpperTankTemp(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            2, b''
+        )
+    
+        return method_result
+    
+    async def GetLowerTankTemp(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            3, b''
+        )
+    
+        return method_result
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()

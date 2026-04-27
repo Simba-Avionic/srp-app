@@ -11,14 +11,16 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.radioservice_dataclass import RadioStatusEventOut
+from proxy.app.dataclasses.fcfileloggerapp_dataclass import LoggingStateOut
+from proxy.app.dataclasses.fcfileloggerapp_dataclass import StartIn
+from proxy.app.dataclasses.fcfileloggerapp_dataclass import StopIn
 
-class RadioServiceManager:
+class FcFileLoggerAppManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(RadioServiceManager, cls).__new__(cls)
+            cls.__instance = super(FcFileLoggerAppManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -26,7 +28,7 @@ class RadioServiceManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.radiostatusevent = None
+            self.loggingstate = None
 
     async def find_service(self):
         try:
@@ -44,17 +46,17 @@ class RadioServiceManager:
             id=32769, event_ids=[32769]
         )
 
-        radioservice = (
+        fcfileloggerapp = (
             ServiceBuilder()
-            .with_service_id(530)
+            .with_service_id(531)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=radioservice,
+            service=fcfileloggerapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10316),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10315),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -68,8 +70,8 @@ class RadioServiceManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    RadioStatusEvent_msg = RadioStatusEventOut().deserialize(someip_message.payload)
-                    self.radiostatusevent = [RadioStatusEvent_msg.data.rxerrors.value, RadioStatusEvent_msg.data.fixed.value, RadioStatusEvent_msg.data.rssi.value, RadioStatusEvent_msg.data.remrssi.value, RadioStatusEvent_msg.data.txbuf.value, RadioStatusEvent_msg.data.noise.value, RadioStatusEvent_msg.data.remnoise.value]
+                    LoggingState_msg = LoggingStateOut().deserialize(someip_message.payload)
+                    self.loggingstate = LoggingState_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -77,11 +79,27 @@ class RadioServiceManager:
         if self.instance:
             await self.instance.close()
 
-    def get_radiostatusevent(self):
-        return self.radiostatusevent
+    def get_loggingstate(self):
+        return self.loggingstate
     
-async def initialize_radioservice(sd):
-    service_manager = RadioServiceManager()
+    async def Start(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            1, b''
+        )
+    
+        return method_result
+    
+    async def Stop(self):
+        await self.find_service()
+        method_result = await self.instance.call_method(
+            2, b''
+        )
+    
+        return method_result
+    
+async def initialize_fcfileloggerapp(sd):
+    service_manager = FcFileLoggerAppManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

@@ -7,6 +7,51 @@ from someipy.serialization import (
 )
 
 @dataclass
+class GetTankPressureIn(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
+class GetTankPressureOut(SomeIpPayload):
+    data: Uint16
+    def __init__(self):
+        self.data = Uint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class GetUpperTankTempIn(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
+class GetUpperTankTempOut(SomeIpPayload):
+    data: Uint16
+    def __init__(self):
+        self.data = Uint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class GetLowerTankTempIn(SomeIpPayload):
+    data: bytes = b''
+
+
+@dataclass
+class GetLowerTankTempOut(SomeIpPayload):
+    data: Uint16
+    def __init__(self):
+        self.data = Uint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
 class NewTempEvent_1Out(SomeIpPayload):
     data: Sint16
     def __init__(self):
