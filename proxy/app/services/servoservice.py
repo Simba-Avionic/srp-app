@@ -11,15 +11,16 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.servoservice_dataclass import ServoStatusEventOut
-from proxy.app.dataclasses.servoservice_dataclass import ServoVentStatusEventOut
-from proxy.app.dataclasses.servoservice_dataclass import ServoDumpStatusEventOut
-from proxy.app.dataclasses.servoservice_dataclass import SetMainServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import ReadMainServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import SetVentServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import ReadVentServoValueIn
-from proxy.app.dataclasses.servoservice_dataclass import SetDumpValueIn
-from proxy.app.dataclasses.servoservice_dataclass import ReadDumpValueIn
+from proxy.app.dataclasses.servoservice_dataclass import NewOxidizerMainValveEventOut
+from proxy.app.dataclasses.servoservice_dataclass import NewOxidizerVentValveEventOut
+from proxy.app.dataclasses.servoservice_dataclass import NewOxidizerDumpValveEventOut
+from proxy.app.dataclasses.servoservice_dataclass import NewPressureFeedMainEventOut
+from proxy.app.dataclasses.servoservice_dataclass import NewPressureFeedVentEventOut
+from proxy.app.dataclasses.servoservice_dataclass import SetOxidizerMainValveIn
+from proxy.app.dataclasses.servoservice_dataclass import SetOxidizerVentValveIn
+from proxy.app.dataclasses.servoservice_dataclass import SetOxidizerDumpValveIn
+from proxy.app.dataclasses.servoservice_dataclass import SetPressureFeedMainValveIn
+from proxy.app.dataclasses.servoservice_dataclass import SetPressureFeedVentValveIn
 
 class ServoServiceManager:
     __instance = None
@@ -34,9 +35,11 @@ class ServoServiceManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.servostatusevent = None
-            self.servoventstatusevent = None
-            self.servodumpstatusevent = None
+            self.newoxidizermainvalveevent = None
+            self.newoxidizerventvalveevent = None
+            self.newoxidizerdumpvalveevent = None
+            self.newpressurefeedmainevent = None
+            self.newpressurefeedventevent = None
 
     async def find_service(self):
         try:
@@ -51,7 +54,7 @@ class ServoServiceManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771]
+            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773]
         )
 
         servoservice = (
@@ -64,7 +67,7 @@ class ServoServiceManager:
         self.instance = await construct_client_service_instance(
             service=servoservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10311),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10325),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -78,22 +81,36 @@ class ServoServiceManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    ServoStatusEvent_msg = ServoStatusEventOut().deserialize(someip_message.payload)
-                    self.servostatusevent = ServoStatusEvent_msg.data.value
+                    newOxidizerMainValveEvent_msg = NewOxidizerMainValveEventOut().deserialize(someip_message.payload)
+                    self.newoxidizermainvalveevent = newOxidizerMainValveEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
-                    ServoVentStatusEvent_msg = ServoVentStatusEventOut().deserialize(someip_message.payload)
-                    self.servoventstatusevent = ServoVentStatusEvent_msg.data.value
+                    newOxidizerVentValveEvent_msg = NewOxidizerVentValveEventOut().deserialize(someip_message.payload)
+                    self.newoxidizerventvalveevent = newOxidizerVentValveEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32771:
                 try:
-                    ServoDumpStatusEvent_msg = ServoDumpStatusEventOut().deserialize(someip_message.payload)
-                    self.servodumpstatusevent = ServoDumpStatusEvent_msg.data.value
+                    newOxidizerDumpValveEvent_msg = NewOxidizerDumpValveEventOut().deserialize(someip_message.payload)
+                    self.newoxidizerdumpvalveevent = newOxidizerDumpValveEvent_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32772:
+                try:
+                    newPressureFeedMainEvent_msg = NewPressureFeedMainEventOut().deserialize(someip_message.payload)
+                    self.newpressurefeedmainevent = newPressureFeedMainEvent_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32773:
+                try:
+                    newPressureFeedVentEvent_msg = NewPressureFeedVentEventOut().deserialize(someip_message.payload)
+                    self.newpressurefeedventevent = newPressureFeedVentEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -101,65 +118,67 @@ class ServoServiceManager:
         if self.instance:
             await self.instance.close()
 
-    def get_servostatusevent(self):
-        return self.servostatusevent
+    def get_newoxidizermainvalveevent(self):
+        return self.newoxidizermainvalveevent
     
-    def get_servoventstatusevent(self):
-        return self.servoventstatusevent
+    def get_newoxidizerventvalveevent(self):
+        return self.newoxidizerventvalveevent
     
-    def get_servodumpstatusevent(self):
-        return self.servodumpstatusevent
+    def get_newoxidizerdumpvalveevent(self):
+        return self.newoxidizerdumpvalveevent
     
-    async def SetMainServoValue(self, setmainservovalue):
+    def get_newpressurefeedmainevent(self):
+        return self.newpressurefeedmainevent
+    
+    def get_newpressurefeedventevent(self):
+        return self.newpressurefeedventevent
+    
+    async def SetOxidizerMainValve(self, setoxidizermainvalve):
         await self.find_service()
-        setmainservovalue_msg = SetMainServoValueIn()
-        setmainservovalue_msg.from_json(setmainservovalue)
+        setoxidizermainvalve_msg = SetOxidizerMainValveIn()
+        setoxidizermainvalve_msg.from_json(setoxidizermainvalve)
         method_result = await self.instance.call_method(
-            1, setmainservovalue_msg.serialize()
+            1, setoxidizermainvalve_msg.serialize()
         )
     
         return method_result
     
-    async def ReadMainServoValue(self):
+    async def SetOxidizerVentValve(self, setoxidizerventvalve):
         await self.find_service()
+        setoxidizerventvalve_msg = SetOxidizerVentValveIn()
+        setoxidizerventvalve_msg.from_json(setoxidizerventvalve)
         method_result = await self.instance.call_method(
-            2, b''
+            3, setoxidizerventvalve_msg.serialize()
         )
     
         return method_result
     
-    async def SetVentServoValue(self, setventservovalue):
+    async def SetOxidizerDumpValve(self, setoxidizerdumpvalve):
         await self.find_service()
-        setventservovalue_msg = SetVentServoValueIn()
-        setventservovalue_msg.from_json(setventservovalue)
+        setoxidizerdumpvalve_msg = SetOxidizerDumpValveIn()
+        setoxidizerdumpvalve_msg.from_json(setoxidizerdumpvalve)
         method_result = await self.instance.call_method(
-            3, setventservovalue_msg.serialize()
+            5, setoxidizerdumpvalve_msg.serialize()
         )
     
         return method_result
     
-    async def ReadVentServoValue(self):
+    async def SetPressureFeedMainValve(self, setpressurefeedmainvalve):
         await self.find_service()
+        setpressurefeedmainvalve_msg = SetPressureFeedMainValveIn()
+        setpressurefeedmainvalve_msg.from_json(setpressurefeedmainvalve)
         method_result = await self.instance.call_method(
-            4, b''
+            7, setpressurefeedmainvalve_msg.serialize()
         )
     
         return method_result
     
-    async def SetDumpValue(self, setdumpvalue):
+    async def SetPressureFeedVentValve(self, setpressurefeedventvalve):
         await self.find_service()
-        setdumpvalue_msg = SetDumpValueIn()
-        setdumpvalue_msg.from_json(setdumpvalue)
+        setpressurefeedventvalve_msg = SetPressureFeedVentValveIn()
+        setpressurefeedventvalve_msg.from_json(setpressurefeedventvalve)
         method_result = await self.instance.call_method(
-            5, setdumpvalue_msg.serialize()
-        )
-    
-        return method_result
-    
-    async def ReadDumpValue(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            6, b''
+            9, setpressurefeedventvalve_msg.serialize()
         )
     
         return method_result

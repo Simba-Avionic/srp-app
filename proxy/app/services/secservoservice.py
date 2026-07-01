@@ -11,16 +11,17 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.recoveryservice_dataclass import NewParachuteStatusEventOut
-from proxy.app.dataclasses.recoveryservice_dataclass import OpenReefedParachuteIn
-from proxy.app.dataclasses.recoveryservice_dataclass import UnreefeParachuteIn
+from proxy.app.dataclasses.secservoservice_dataclass import NewEthanolMainValveEventOut
+from proxy.app.dataclasses.secservoservice_dataclass import NewEthanolVentValveEventOut
+from proxy.app.dataclasses.secservoservice_dataclass import SetEtanolMainValveIn
+from proxy.app.dataclasses.secservoservice_dataclass import SetEthanolVentValveIn
 
-class RecoveryServiceManager:
+class SecServoServiceManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(RecoveryServiceManager, cls).__new__(cls)
+            cls.__instance = super(SecServoServiceManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -28,7 +29,8 @@ class RecoveryServiceManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.newparachutestatusevent = None
+            self.newethanolmainvalveevent = None
+            self.newethanolventvalveevent = None
 
     async def find_service(self):
         try:
@@ -43,20 +45,20 @@ class RecoveryServiceManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769]
+            id=32769, event_ids=[32769, 32770]
         )
 
-        recoveryservice = (
+        secservoservice = (
             ServiceBuilder()
-            .with_service_id(520)
+            .with_service_id(525)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=recoveryservice,
+            service=secservoservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10331),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10327),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -70,8 +72,15 @@ class RecoveryServiceManager:
         match someip_message.header.method_id:
             case 32769:
                 try:
-                    NewParachuteStatusEvent_msg = NewParachuteStatusEventOut().deserialize(someip_message.payload)
-                    self.newparachutestatusevent = NewParachuteStatusEvent_msg.data.value
+                    newEthanolMainValveEvent_msg = NewEthanolMainValveEventOut().deserialize(someip_message.payload)
+                    self.newethanolmainvalveevent = newEthanolMainValveEvent_msg.data.value
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32770:
+                try:
+                    newEthanolVentValveEvent_msg = NewEthanolVentValveEventOut().deserialize(someip_message.payload)
+                    self.newethanolventvalveevent = newEthanolVentValveEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -79,27 +88,34 @@ class RecoveryServiceManager:
         if self.instance:
             await self.instance.close()
 
-    def get_newparachutestatusevent(self):
-        return self.newparachutestatusevent
+    def get_newethanolmainvalveevent(self):
+        return self.newethanolmainvalveevent
     
-    async def OpenReefedParachute(self):
+    def get_newethanolventvalveevent(self):
+        return self.newethanolventvalveevent
+    
+    async def SetEtanolMainValve(self, setetanolmainvalve):
         await self.find_service()
+        setetanolmainvalve_msg = SetEtanolMainValveIn()
+        setetanolmainvalve_msg.from_json(setetanolmainvalve)
         method_result = await self.instance.call_method(
-            1, b''
+            1, setetanolmainvalve_msg.serialize()
         )
     
         return method_result
     
-    async def UnreefeParachute(self):
+    async def SetEthanolVentValve(self, setethanolventvalve):
         await self.find_service()
+        setethanolventvalve_msg = SetEthanolVentValveIn()
+        setethanolventvalve_msg.from_json(setethanolventvalve)
         method_result = await self.instance.call_method(
-            2, b''
+            2, setethanolventvalve_msg.serialize()
         )
     
         return method_result
     
-async def initialize_recoveryservice(sd):
-    service_manager = RecoveryServiceManager()
+async def initialize_secservoservice(sd):
+    service_manager = SecServoServiceManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

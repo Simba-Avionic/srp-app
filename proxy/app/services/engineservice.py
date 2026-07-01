@@ -12,12 +12,7 @@ from someipy import (
 )
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.engineservice_dataclass import CurrentModeOut
-from proxy.app.dataclasses.engineservice_dataclass import NewVentValveStatusOut
-from proxy.app.dataclasses.engineservice_dataclass import NewHBStatusOut
-from proxy.app.dataclasses.engineservice_dataclass import StartIn
 from proxy.app.dataclasses.engineservice_dataclass import SetModeIn
-from proxy.app.dataclasses.engineservice_dataclass import GetModeIn
-from proxy.app.dataclasses.engineservice_dataclass import SetVentValveIn
 
 class EngineServiceManager:
     __instance = None
@@ -33,8 +28,6 @@ class EngineServiceManager:
             self.initialized = False
             self.instance = None
             self.currentmode = None
-            self.newventvalvestatus = None
-            self.newhbstatus = None
 
     async def find_service(self):
         try:
@@ -49,7 +42,7 @@ class EngineServiceManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771]
+            id=32769, event_ids=[32769]
         )
 
         engineservice = (
@@ -62,7 +55,7 @@ class EngineServiceManager:
         self.instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10309),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10322),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -81,20 +74,6 @@ class EngineServiceManager:
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
-            case 32770:
-                try:
-                    NewVentValveStatus_msg = NewVentValveStatusOut().deserialize(someip_message.payload)
-                    self.newventvalvestatus = NewVentValveStatus_msg.data.value
-                except Exception as e:
-                    logger.exception(f"Error in deserialization: {e}")
-    
-            case 32771:
-                try:
-                    NewHBStatus_msg = NewHBStatusOut().deserialize(someip_message.payload)
-                    self.newhbstatus = NewHBStatus_msg.data.value
-                except Exception as e:
-                    logger.exception(f"Error in deserialization: {e}")
-    
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
@@ -102,44 +81,12 @@ class EngineServiceManager:
     def get_currentmode(self):
         return self.currentmode
     
-    def get_newventvalvestatus(self):
-        return self.newventvalvestatus
-    
-    def get_newhbstatus(self):
-        return self.newhbstatus
-    
-    async def Start(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            1, b''
-        )
-    
-        return method_result
-    
     async def SetMode(self, setmode):
         await self.find_service()
         setmode_msg = SetModeIn()
         setmode_msg.from_json(setmode)
         method_result = await self.instance.call_method(
             2, setmode_msg.serialize()
-        )
-    
-        return method_result
-    
-    async def GetMode(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            3, b''
-        )
-    
-        return method_result
-    
-    async def SetVentValve(self, setventvalve):
-        await self.find_service()
-        setventvalve_msg = SetVentValveIn()
-        setventvalve_msg.from_json(setventvalve)
-        method_result = await self.instance.call_method(
-            4, setventvalve_msg.serialize()
         )
     
         return method_result

@@ -12,10 +12,7 @@ from someipy import (
 )
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.primerservice_dataclass import PrimeStatusEventOut
-from proxy.app.dataclasses.primerservice_dataclass import OnPrimeIn
-from proxy.app.dataclasses.primerservice_dataclass import OffPrimeIn
 from proxy.app.dataclasses.primerservice_dataclass import StartPrimeIn
-from proxy.app.dataclasses.primerservice_dataclass import GetPrimerStateIn
 
 class PrimerServiceManager:
     __instance = None
@@ -58,7 +55,7 @@ class PrimerServiceManager:
         self.instance = await construct_client_service_instance(
             service=primerservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10306),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10319),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -84,34 +81,10 @@ class PrimerServiceManager:
     def get_primestatusevent(self):
         return self.primestatusevent
     
-    async def OnPrime(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            1, b''
-        )
-    
-        return method_result
-    
-    async def OffPrime(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            2, b''
-        )
-    
-        return method_result
-    
     async def StartPrime(self):
         await self.find_service()
         method_result = await self.instance.call_method(
             3, b''
-        )
-    
-        return method_result
-    
-    async def GetPrimerState(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            4, b''
         )
     
         return method_result

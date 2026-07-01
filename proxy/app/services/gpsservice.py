@@ -12,6 +12,8 @@ from someipy import (
 )
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.gpsservice_dataclass import GPSStatusEventOut
+from proxy.app.dataclasses.gpsservice_dataclass import GPSRMCStatusEventOut
+from proxy.app.dataclasses.gpsservice_dataclass import GPSVTGStatusEventOut
 
 class GPSServiceManager:
     __instance = None
@@ -27,6 +29,8 @@ class GPSServiceManager:
             self.initialized = False
             self.instance = None
             self.gpsstatusevent = None
+            self.gpsrmcstatusevent = None
+            self.gpsvtgstatusevent = None
 
     async def find_service(self):
         try:
@@ -41,7 +45,7 @@ class GPSServiceManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769]
+            id=32769, event_ids=[32769, 32770, 32771]
         )
 
         gpsservice = (
@@ -54,7 +58,7 @@ class GPSServiceManager:
         self.instance = await construct_client_service_instance(
             service=gpsservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10317),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10334),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -73,12 +77,32 @@ class GPSServiceManager:
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
+            case 32770:
+                try:
+                    GPSRMCStatusEvent_msg = GPSRMCStatusEventOut().deserialize(someip_message.payload)
+                    self.gpsrmcstatusevent = [GPSRMCStatusEvent_msg.data.latitude.value, GPSRMCStatusEvent_msg.data.longitude.value, GPSRMCStatusEvent_msg.data.speed.value, GPSRMCStatusEvent_msg.data.angle.value]
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
+            case 32771:
+                try:
+                    GPSVTGStatusEvent_msg = GPSVTGStatusEventOut().deserialize(someip_message.payload)
+                    self.gpsvtgstatusevent = [GPSVTGStatusEvent_msg.data.trueCourse.value, GPSVTGStatusEvent_msg.data.relativeSpeed.value]
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
 
     def get_gpsstatusevent(self):
         return self.gpsstatusevent
+    
+    def get_gpsrmcstatusevent(self):
+        return self.gpsrmcstatusevent
+    
+    def get_gpsvtgstatusevent(self):
+        return self.gpsvtgstatusevent
     
 async def initialize_gpsservice(sd):
     service_manager = GPSServiceManager()

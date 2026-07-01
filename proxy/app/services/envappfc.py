@@ -15,6 +15,7 @@ from proxy.app.dataclasses.envappfc_dataclass import NewBoardTempEvent_1Out
 from proxy.app.dataclasses.envappfc_dataclass import NewBoardTempEvent_2Out
 from proxy.app.dataclasses.envappfc_dataclass import NewBoardTempEvent_3Out
 from proxy.app.dataclasses.envappfc_dataclass import NewBME280EventOut
+from proxy.app.dataclasses.envappfc_dataclass import NewIMUEventOut
 
 class EnvAppFcManager:
     __instance = None
@@ -33,6 +34,7 @@ class EnvAppFcManager:
             self.newboardtempevent_2 = None
             self.newboardtempevent_3 = None
             self.newbme280event = None
+            self.newimuevent = None
 
     async def find_service(self):
         try:
@@ -47,7 +49,7 @@ class EnvAppFcManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772]
+            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773]
         )
 
         envappfc = (
@@ -60,7 +62,7 @@ class EnvAppFcManager:
         self.instance = await construct_client_service_instance(
             service=envappfc,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10312),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10328),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -100,6 +102,13 @@ class EnvAppFcManager:
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
+            case 32773:
+                try:
+                    newIMUEvent_msg = NewIMUEventOut().deserialize(someip_message.payload)
+                    self.newimuevent = [newIMUEvent_msg.data.gyroscope_x.value, newIMUEvent_msg.data.gyroscope_y.value, newIMUEvent_msg.data.gyroscope_z.value, newIMUEvent_msg.data.accel_x.value, newIMUEvent_msg.data.accel_y.value, newIMUEvent_msg.data.accel_z.value]
+                except Exception as e:
+                    logger.exception(f"Error in deserialization: {e}")
+    
     async def shutdown(self):
         if self.instance:
             await self.instance.close()
@@ -115,6 +124,9 @@ class EnvAppFcManager:
     
     def get_newbme280event(self):
         return self.newbme280event
+    
+    def get_newimuevent(self):
+        return self.newimuevent
     
 async def initialize_envappfc(sd):
     service_manager = EnvAppFcManager()

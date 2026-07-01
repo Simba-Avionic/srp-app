@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.recoveryservice_dataclass import (UnreefeParachuteOut, OpenReefedParachuteOut)
+from proxy.app.dataclasses.recoveryservice_dataclass import (OpenReefedParachuteOut, UnreefeParachuteOut)
 from proxy.app.services.recoveryservice import RecoveryServiceManager
 from api.common import process_method_result
 

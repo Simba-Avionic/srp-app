@@ -6,7 +6,7 @@ from someipy.serialization import (
 )
 
 @dataclass
-class SetMainServoValueIn(SomeIpPayload):
+class SetOxidizerMainValveIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -16,7 +16,7 @@ class SetMainServoValueIn(SomeIpPayload):
 
 
 @dataclass
-class SetMainServoValueOut(SomeIpPayload):
+class SetOxidizerMainValveOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -26,12 +26,7 @@ class SetMainServoValueOut(SomeIpPayload):
 
 
 @dataclass
-class ReadMainServoValueIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class ReadMainServoValueOut(SomeIpPayload):
+class SetOxidizerVentValveIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -41,17 +36,7 @@ class ReadMainServoValueOut(SomeIpPayload):
 
 
 @dataclass
-class SetVentServoValueIn(SomeIpPayload):
-    data: Uint8
-    def __init__(self):
-        self.data = Uint8()
-
-    def from_json(self, json_argument):
-        self.data.value = int(json_argument)
-
-
-@dataclass
-class SetVentServoValueOut(SomeIpPayload):
+class SetOxidizerVentValveOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -61,12 +46,7 @@ class SetVentServoValueOut(SomeIpPayload):
 
 
 @dataclass
-class ReadVentServoValueIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class ReadVentServoValueOut(SomeIpPayload):
+class SetOxidizerDumpValveIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -76,17 +56,7 @@ class ReadVentServoValueOut(SomeIpPayload):
 
 
 @dataclass
-class SetDumpValueIn(SomeIpPayload):
-    data: Uint8
-    def __init__(self):
-        self.data = Uint8()
-
-    def from_json(self, json_argument):
-        self.data.value = int(json_argument)
-
-
-@dataclass
-class SetDumpValueOut(SomeIpPayload):
+class SetOxidizerDumpValveOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -96,12 +66,7 @@ class SetDumpValueOut(SomeIpPayload):
 
 
 @dataclass
-class ReadDumpValueIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class ReadDumpValueOut(SomeIpPayload):
+class SetPressureFeedMainValveIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -111,7 +76,17 @@ class ReadDumpValueOut(SomeIpPayload):
 
 
 @dataclass
-class ServoStatusEventOut(SomeIpPayload):
+class SetPressureFeedMainValveOut(SomeIpPayload):
+    data: Bool
+    def __init__(self):
+        self.data = Bool()
+
+    def from_json(self, json_argument):
+        self.data.value = bool(json_argument)
+
+
+@dataclass
+class SetPressureFeedVentValveIn(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -121,7 +96,17 @@ class ServoStatusEventOut(SomeIpPayload):
 
 
 @dataclass
-class ServoVentStatusEventOut(SomeIpPayload):
+class SetPressureFeedVentValveOut(SomeIpPayload):
+    data: Bool
+    def __init__(self):
+        self.data = Bool()
+
+    def from_json(self, json_argument):
+        self.data.value = bool(json_argument)
+
+
+@dataclass
+class NewOxidizerMainValveEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()
@@ -131,7 +116,37 @@ class ServoVentStatusEventOut(SomeIpPayload):
 
 
 @dataclass
-class ServoDumpStatusEventOut(SomeIpPayload):
+class NewOxidizerVentValveEventOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewOxidizerDumpValveEventOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewPressureFeedMainEventOut(SomeIpPayload):
+    data: Uint8
+    def __init__(self):
+        self.data = Uint8()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewPressureFeedVentEventOut(SomeIpPayload):
     data: Uint8
     def __init__(self):
         self.data = Uint8()

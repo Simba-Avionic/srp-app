@@ -6,37 +6,7 @@ from someipy.serialization import (
 )
 
 @dataclass
-class NewTempEvent_1Out(SomeIpPayload):
-    data: Sint16
-    def __init__(self):
-        self.data = Sint16()
-
-    def from_json(self, json_argument):
-        self.data.value = int(json_argument)
-
-
-@dataclass
-class NewTempEvent_2Out(SomeIpPayload):
-    data: Sint16
-    def __init__(self):
-        self.data = Sint16()
-
-    def from_json(self, json_argument):
-        self.data.value = int(json_argument)
-
-
-@dataclass
-class NewTempEvent_3Out(SomeIpPayload):
-    data: Sint16
-    def __init__(self):
-        self.data = Sint16()
-
-    def from_json(self, json_argument):
-        self.data.value = int(json_argument)
-
-
-@dataclass
-class NewOxidizerPressEventOut(SomeIpPayload):
+class NewEthanolPressEventOut(SomeIpPayload):
     data: Float32
     def __init__(self):
         self.data = Float32()
@@ -46,7 +16,7 @@ class NewOxidizerPressEventOut(SomeIpPayload):
 
 
 @dataclass
-class NewPressureFeedPressEventOut(SomeIpPayload):
+class NewChamberPressEvent2Out(SomeIpPayload):
     data: Float32
     def __init__(self):
         self.data = Float32()
@@ -56,7 +26,7 @@ class NewPressureFeedPressEventOut(SomeIpPayload):
 
 
 @dataclass
-class NewChamberPressEvent1Out(SomeIpPayload):
+class NewChamberPressEvent3Out(SomeIpPayload):
     data: Float32
     def __init__(self):
         self.data = Float32()

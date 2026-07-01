@@ -2,16 +2,10 @@ from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
     Bool,
-    Uint8,
 )
 
 @dataclass
-class StartPrimeIn(SomeIpPayload):
-    data: bytes = b''
-
-
-@dataclass
-class StartPrimeOut(SomeIpPayload):
+class NewApogeeDetectedOut(SomeIpPayload):
     data: Bool
     def __init__(self):
         self.data = Bool()
@@ -21,10 +15,10 @@ class StartPrimeOut(SomeIpPayload):
 
 
 @dataclass
-class PrimeStatusEventOut(SomeIpPayload):
-    data: Uint8
+class NewMainParachuteDetectedOut(SomeIpPayload):
+    data: Bool
     def __init__(self):
-        self.data = Uint8()
+        self.data = Bool()
 
     def from_json(self, json_argument):
-        self.data.value = int(json_argument)
+        self.data.value = bool(json_argument)

@@ -11,22 +11,19 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
-from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_1Out
-from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_2Out
-from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_3Out
-from proxy.app.dataclasses.envapp_dataclass import NewOxidizerPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import NewPressureFeedPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import NewChamberPressEvent1Out
-from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent1Out
-from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent2Out
-from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent3Out
+from proxy.app.dataclasses.secenvapp_dataclass import NewEthanolPressEventOut
+from proxy.app.dataclasses.secenvapp_dataclass import NewChamberPressEvent2Out
+from proxy.app.dataclasses.secenvapp_dataclass import NewChamberPressEvent3Out
+from proxy.app.dataclasses.secenvapp_dataclass import NewBoardTempEvent1Out
+from proxy.app.dataclasses.secenvapp_dataclass import NewBoardTempEvent2Out
+from proxy.app.dataclasses.secenvapp_dataclass import NewBoardTempEvent3Out
 
-class EnvAppManager:
+class SecEnvAppManager:
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
-            cls.__instance = super(EnvAppManager, cls).__new__(cls)
+            cls.__instance = super(SecEnvAppManager, cls).__new__(cls)
         return cls.__instance
 
     def __init__(self):
@@ -34,12 +31,9 @@ class EnvAppManager:
             self.service_discovery = None
             self.initialized = False
             self.instance = None
-            self.newtempevent_1 = None
-            self.newtempevent_2 = None
-            self.newtempevent_3 = None
-            self.newoxidizerpressevent = None
-            self.newpressurefeedpressevent = None
-            self.newchamberpressevent1 = None
+            self.newethanolpressevent = None
+            self.newchamberpressevent2 = None
+            self.newchamberpressevent3 = None
             self.newboardtempevent1 = None
             self.newboardtempevent2 = None
             self.newboardtempevent3 = None
@@ -57,20 +51,20 @@ class EnvAppManager:
 
     async def setup_manager(self) -> None:            
         event_group = EventGroup(
-            id=32769, event_ids=[32769, 32770, 32771, 32772, 32773, 32774, 32775, 32776, 32777]
+            id=32772, event_ids=[32772, 32773, 32774, 32775, 32776, 32777]
         )
 
-        envapp = (
+        secenvapp = (
             ServiceBuilder()
-            .with_service_id(514)
+            .with_service_id(526)
             .with_major_version(1).with_eventgroup(event_group)
             .build()
         )
 
         self.instance = await construct_client_service_instance(
-            service=envapp,
+            service=secenvapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10320),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10326),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -82,45 +76,24 @@ class EnvAppManager:
         
     def event_callback(self, someip_message: SomeIpMessage) -> None:
         match someip_message.header.method_id:
-            case 32769:
-                try:
-                    newTempEvent_1_msg = NewTempEvent_1Out().deserialize(someip_message.payload)
-                    self.newtempevent_1 = newTempEvent_1_msg.data.value
-                except Exception as e:
-                    logger.exception(f"Error in deserialization: {e}")
-    
-            case 32770:
-                try:
-                    newTempEvent_2_msg = NewTempEvent_2Out().deserialize(someip_message.payload)
-                    self.newtempevent_2 = newTempEvent_2_msg.data.value
-                except Exception as e:
-                    logger.exception(f"Error in deserialization: {e}")
-    
-            case 32771:
-                try:
-                    newTempEvent_3_msg = NewTempEvent_3Out().deserialize(someip_message.payload)
-                    self.newtempevent_3 = newTempEvent_3_msg.data.value
-                except Exception as e:
-                    logger.exception(f"Error in deserialization: {e}")
-    
             case 32772:
                 try:
-                    newOxidizerPressEvent_msg = NewOxidizerPressEventOut().deserialize(someip_message.payload)
-                    self.newoxidizerpressevent = newOxidizerPressEvent_msg.data.value
+                    newEthanolPressEvent_msg = NewEthanolPressEventOut().deserialize(someip_message.payload)
+                    self.newethanolpressevent = newEthanolPressEvent_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32773:
                 try:
-                    newPressureFeedPressEvent_msg = NewPressureFeedPressEventOut().deserialize(someip_message.payload)
-                    self.newpressurefeedpressevent = newPressureFeedPressEvent_msg.data.value
+                    newChamberPressEvent2_msg = NewChamberPressEvent2Out().deserialize(someip_message.payload)
+                    self.newchamberpressevent2 = newChamberPressEvent2_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32774:
                 try:
-                    newChamberPressEvent1_msg = NewChamberPressEvent1Out().deserialize(someip_message.payload)
-                    self.newchamberpressevent1 = newChamberPressEvent1_msg.data.value
+                    newChamberPressEvent3_msg = NewChamberPressEvent3Out().deserialize(someip_message.payload)
+                    self.newchamberpressevent3 = newChamberPressEvent3_msg.data.value
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -149,23 +122,14 @@ class EnvAppManager:
         if self.instance:
             await self.instance.close()
 
-    def get_newtempevent_1(self):
-        return self.newtempevent_1
+    def get_newethanolpressevent(self):
+        return self.newethanolpressevent
     
-    def get_newtempevent_2(self):
-        return self.newtempevent_2
+    def get_newchamberpressevent2(self):
+        return self.newchamberpressevent2
     
-    def get_newtempevent_3(self):
-        return self.newtempevent_3
-    
-    def get_newoxidizerpressevent(self):
-        return self.newoxidizerpressevent
-    
-    def get_newpressurefeedpressevent(self):
-        return self.newpressurefeedpressevent
-    
-    def get_newchamberpressevent1(self):
-        return self.newchamberpressevent1
+    def get_newchamberpressevent3(self):
+        return self.newchamberpressevent3
     
     def get_newboardtempevent1(self):
         return self.newboardtempevent1
@@ -176,8 +140,8 @@ class EnvAppManager:
     def get_newboardtempevent3(self):
         return self.newboardtempevent3
     
-async def initialize_envapp(sd):
-    service_manager = EnvAppManager()
+async def initialize_secenvapp(sd):
+    service_manager = SecEnvAppManager()
     service_manager.assign_service_discovery(sd)
     await service_manager.setup_manager()
     try:

@@ -55,7 +55,7 @@ class MainServiceManager:
         self.instance = await construct_client_service_instance(
             service=mainservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10318),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10335),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -83,7 +83,7 @@ class MainServiceManager:
     
     async def SetMode(self, setmode):
         await self.find_service()
-        setmode_msg = SetModeIn()
+        setmode_msg = setModeIn()
         setmode_msg.from_json(setmode)
         method_result = await self.instance.call_method(
             1, setmode_msg.serialize()
