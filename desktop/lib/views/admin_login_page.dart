@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:desktop/config/admin_config.dart';
 import 'package:desktop/services/admin_session.dart';
-import 'package:desktop/views/app_shell.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -25,6 +24,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   void initState() {
     super.initState();
     _loadConfig();
+    if (AdminSession.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed('/admin');
+        }
+      });
+    }
   }
 
   Future<void> _loadConfig() async {
@@ -44,11 +50,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     await AdminConfig.load();
     if (_passwordController.text == AdminConfig.password) {
       AdminSession.authenticate();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const AppShell(readOnly: false),
-        ),
-      );
+      Navigator.of(context).pushReplacementNamed('/admin');
       return;
     }
 

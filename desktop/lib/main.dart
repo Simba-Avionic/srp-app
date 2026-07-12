@@ -70,6 +70,11 @@ class MyApp extends StatelessWidget {
             );
           case '/':
           default:
+            if (AdminSession.isAuthenticated) {
+              return MaterialPageRoute(
+                builder: (_) => const AppShell(readOnly: false),
+              );
+            }
             return MaterialPageRoute(
               builder: (_) => const AppShell(readOnly: true),
             );
