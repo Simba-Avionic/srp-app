@@ -22,13 +22,12 @@ services:
     build:
       context: .
       dockerfile: desktop/Dockerfile
-      args:
-        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     container_name: srp-desktop
     ports:
       - "${DESKTOP_PORT}:80"
     environment:
       PROXY_UPSTREAM: host.docker.internal:5000
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

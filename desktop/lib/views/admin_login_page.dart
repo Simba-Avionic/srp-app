@@ -14,6 +14,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   final _passwordController = TextEditingController();
   String? _errorMessage;
   bool _obscurePassword = true;
+  bool _loading = true;
 
   static const _cardColor = Color(0xFFF8FAFC);
   static const _titleColor = Color(0xFF111827);
@@ -21,12 +22,26 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   static const _accentColor = Color(0xFF2563EB);
 
   @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  Future<void> _loadConfig() async {
+    await AdminConfig.load();
+    if (mounted) {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
   void dispose() {
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    await AdminConfig.load();
     if (_passwordController.text == AdminConfig.password) {
       AdminSession.authenticate();
       Navigator.of(context).pushReplacement(
@@ -94,6 +109,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (_loading)
+                    const Center(child: CircularProgressIndicator())
+                  else ...[
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -164,6 +182,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     ),
                     child: const Text('Wróć do podglądu'),
                   ),
+                  ],
                 ],
               ),
             ),
