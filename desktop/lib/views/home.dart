@@ -112,129 +112,29 @@ class Home extends StatelessWidget {
       ]
     };
 
-    // --- FC ---
-    final Map<String, dynamic> MainService = {
-      "serviceName": "MainService",
-      "serviceId": 521,
-      "methods": [
-        {"name": "SetMode", "id": 1, "in_type": "uint8"}
-      ],
-      "events": [
-        {"name": "CurrentModeStatusEvent", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> EnvAppFc = {
-      "serviceName": "EnvAppFc",
-      "serviceId": 529,
-      "events": [
-        {"name": "newBoardTempEvent_1", "id": 32769},
-        {"name": "newBoardTempEvent_2", "id": 32770},
-        {"name": "newBoardTempEvent_3", "id": 32771},
-        {"name": "newBME280Event", "id": 32772},
-        {"name": "newIMUEvent", "id": 32773}
-      ]
-    };
-
-    final Map<String, dynamic> GPSService = {
-      "serviceName": "GPSService",
-      "serviceId": 519,
-      "events": [
-        {"name": "GPSStatusEvent", "id": 32769},
-        {"name": "GPSRMCStatusEvent", "id": 32770},
-        {"name": "GPSVTGStatusEvent", "id": 32771}
-      ]
-    };
-
-    final Map<String, dynamic> RadioService = {
-      "serviceName": "RadioService",
-      "serviceId": 530,
-      "events": [
-        {"name": "RadioStatusEvent", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> FcRadioService = {
-      "serviceName": "FcRadioService",
-      "serviceId": 545,
-      "events": [
-        {"name": "RadioStatusEvent", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> FcFileLoggerApp = {
-      "serviceName": "FcFileLoggerApp",
-      "serviceId": 531,
-      "methods": [
-        {"name": "Start", "id": 1, "in_type": "void"},
-        {"name": "Stop", "id": 2, "in_type": "void"}
-      ],
-      "events": [
-        {"name": "LoggingState", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> FcSysStatService = {
-      "serviceName": "FcSysStatService",
-      "serviceId": 523,
-      "events": [
-        {"name": "NewSystemUsage", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> RecoveryService = {
-      "serviceName": "RecoveryService",
-      "serviceId": 520,
-      "methods": [
-        {"name": "OpenReefedParachute", "id": 1, "in_type": "void"},
-        {"name": "UnreefeParachute", "id": 2, "in_type": "void"}
-      ],
-      "events": [
-        {"name": "NewParachuteStatusEvent", "id": 32769}
-      ]
-    };
-
-    final Map<String, dynamic> ApogeeDetectService = {
-      "serviceName": "ApogeeDetectService",
-      "serviceId": 555,
-      "events": [
-        {"name": "newApogeeDetected", "id": 32769},
-        {"name": "newMainParachuteDetected", "id": 32770}
-      ]
-    };
-
     final services = [
       // Oxidizer EC
       EngineService,
       EnvApp,
       ServoService,
       FileLoggerApp,
-      PrimerService,
+      SecServoService,
       SysStatService,
       // Sec EC
       SecEnvApp,
-      SecServoService,
-      // FC
-      MainService,
-      EnvAppFc,
-      GPSService,
-      RadioService,
-      FcRadioService,
-      FcFileLoggerApp,
-      FcSysStatService,
-      RecoveryService,
-      ApogeeDetectService,
+      PrimerService,
     ];
 
     return Container(
+      width: double.infinity,
       color: Colors.white,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       child: MasonryGridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 3,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
         itemCount: services.length,
         itemBuilder: (context, index) {
           final service = services[index];

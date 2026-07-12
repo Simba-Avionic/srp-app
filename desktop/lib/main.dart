@@ -158,7 +158,8 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Sidebar(),
             ),
             Expanded(
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: SingleChildScrollView(
                   child: Home(),
                 ),

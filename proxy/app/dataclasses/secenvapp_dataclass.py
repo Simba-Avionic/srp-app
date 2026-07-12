@@ -1,38 +1,37 @@
 from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
-    Float32,
     Sint16,
 )
 
 @dataclass
 class NewEthanolPressEventOut(SomeIpPayload):
-    data: Float32
+    data: Sint16
     def __init__(self):
-        self.data = Float32()
+        self.data = Sint16()
 
     def from_json(self, json_argument):
-        self.data.value = float(json_argument)
+        self.data.value = int(json_argument)
 
 
 @dataclass
 class NewChamberPressEvent2Out(SomeIpPayload):
-    data: Float32
+    data: Sint16
     def __init__(self):
-        self.data = Float32()
+        self.data = Sint16()
 
     def from_json(self, json_argument):
-        self.data.value = float(json_argument)
+        self.data.value = int(json_argument)
 
 
 @dataclass
 class NewChamberPressEvent3Out(SomeIpPayload):
-    data: Float32
+    data: Sint16
     def __init__(self):
-        self.data = Float32()
+        self.data = Sint16()
 
     def from_json(self, json_argument):
-        self.data.value = float(json_argument)
+        self.data.value = int(json_argument)
 
 
 @dataclass

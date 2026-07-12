@@ -1,56 +1,112 @@
-# Prerequisites
-*.d
+# ==========================================
+# Ogólne i Systemowe
+# ==========================================
+.DS_Store
+Thumbs.db
+*.log
+*.logs
 
-# Compiled Object files
+# Środowiska IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# ==========================================
+# Kompilaty i pliki binarne (C/C++/Fortran itp.)
+# ==========================================
+*.d
 *.slo
 *.lo
 *.o
 *.obj
-
-# Precompiled Headers
 *.gch
 *.pch
-
-# Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
 *.mod
 *.smod
-
-# Compiled Static libraries
 *.lai
 *.la
 *.a
 *.lib
-
-# Executables
 *.exe
 *.out
 *.app
 
-*.log
-*.logs
-
-*.pyc
+# ==========================================
+# Sekcja Python
+# ==========================================
 __pycache__/
-__pycache__/*
-.idea/
-.idea/*
-.vscode/
-.vscode/*
+*.py[cod]
+*$py.class
+.pytest_cache/
+.htmlcov/
+.tox/
+.coverage
+.coverage.*
 
-venv
+# Środowiska wirtualne Python
 venv/
-.venv
-.venv/*
-__pycache__
-__pycache__/*
-desktop/build
-desktop/build/*
-desktop/linux
-desktop/linux/*
-desktop/android
-desktop/android/*
+.venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# ==========================================
+# Sekcja Flutter / Dart
+# ==========================================
+# Narzędzia Fluttera i pobrane pakiety
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Pliki generowane automatycznie przez Fluttera dla platform
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/ios/.symlinks/
+/ios/Pods/
+/ios/DerivedData/
+/linux/flutter/ephemeral/
+/macos/Flutter/ephemeral/
+/windows/flutter/ephemeral/
+
+# Katalogi budowania (Build)
+build/
+/desktop/build/
+
+# Pliki konfiguracyjne specyficzne dla maszyn (zawierają lokalne ścieżki)
+.android/
+.ios/
+android/local.properties
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/Generated.xcconfig
+windows/flutter/generated_config.impl
+windows/flutter/generated_config.nmake
+
+# Web specyficzne
+.server/
+
+# Zrzuty pamięci/Web dev
+node_modules/
+
+# ==========================================
+# Sekcja Bezpieczeństwo (Sekrety)
+# ==========================================
+.env
+.env.*
+*.secret
+
+
+desktop/data/csv/data.csv

@@ -11,6 +11,8 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
+from proxy.app.pressure import pressure_from_raw
+from proxy.app.temperature import temperature_from_raw
 from proxy.app.dataclasses.secenvapp_dataclass import NewEthanolPressEventOut
 from proxy.app.dataclasses.secenvapp_dataclass import NewChamberPressEvent2Out
 from proxy.app.dataclasses.secenvapp_dataclass import NewChamberPressEvent3Out
@@ -79,42 +81,42 @@ class SecEnvAppManager:
             case 32772:
                 try:
                     newEthanolPressEvent_msg = NewEthanolPressEventOut().deserialize(someip_message.payload)
-                    self.newethanolpressevent = newEthanolPressEvent_msg.data.value
+                    self.newethanolpressevent = pressure_from_raw(newEthanolPressEvent_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32773:
                 try:
                     newChamberPressEvent2_msg = NewChamberPressEvent2Out().deserialize(someip_message.payload)
-                    self.newchamberpressevent2 = newChamberPressEvent2_msg.data.value
+                    self.newchamberpressevent2 = pressure_from_raw(newChamberPressEvent2_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32774:
                 try:
                     newChamberPressEvent3_msg = NewChamberPressEvent3Out().deserialize(someip_message.payload)
-                    self.newchamberpressevent3 = newChamberPressEvent3_msg.data.value
+                    self.newchamberpressevent3 = pressure_from_raw(newChamberPressEvent3_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32775:
                 try:
                     newBoardTempEvent1_msg = NewBoardTempEvent1Out().deserialize(someip_message.payload)
-                    self.newboardtempevent1 = newBoardTempEvent1_msg.data.value
+                    self.newboardtempevent1 = temperature_from_raw(newBoardTempEvent1_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32776:
                 try:
                     newBoardTempEvent2_msg = NewBoardTempEvent2Out().deserialize(someip_message.payload)
-                    self.newboardtempevent2 = newBoardTempEvent2_msg.data.value
+                    self.newboardtempevent2 = temperature_from_raw(newBoardTempEvent2_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32777:
                 try:
                     newBoardTempEvent3_msg = NewBoardTempEvent3Out().deserialize(someip_message.payload)
-                    self.newboardtempevent3 = newBoardTempEvent3_msg.data.value
+                    self.newboardtempevent3 = temperature_from_raw(newBoardTempEvent3_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
