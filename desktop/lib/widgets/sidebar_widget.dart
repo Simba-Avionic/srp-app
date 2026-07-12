@@ -1,7 +1,9 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:csv/csv.dart';
-import 'package:path/path.dart' as p;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:desktop/services/base.dart';
 
 import 'csv_data_screen.dart';
 
@@ -14,13 +16,21 @@ class Sidebar extends StatelessWidget {
   });
 
   Future<List<List<dynamic>>> getCsvFileContent() async {
-    final currentDir = Directory.current.path;
-    final filePath = p.join(currentDir, 'desktop', 'data', 'csv', 'data.csv');
-
-    final file = File(filePath);
-    if (await file.exists()) {
-      final fileContent = await file.readAsString();
-      return CsvToListConverter().convert(fileContent);
+    try {
+      final response = await http.get(Uri.parse(apiUrl('/save/data')));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final rows = data['rows'];
+        if (rows is List) {
+          return rows
+              .map((row) => List<dynamic>.from(row as List))
+              .toList();
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading CSV: $e');
+      }
     }
     return [];
   }

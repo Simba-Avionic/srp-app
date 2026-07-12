@@ -21,6 +21,28 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   bool isSaving = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.readOnly) {
+      _syncSaveStatus();
+    }
+  }
+
+  Future<void> _syncSaveStatus() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl('/save/status')));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        if (mounted) {
+          setState(() {
+            isSaving = data['collecting'] == true || data['task_running'] == true;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   Future<void> toggleSaving() async {
     if (isSaving) {
       final confirmStop = await showDialog<bool>(
@@ -73,7 +95,25 @@ class _AppShellState extends State<AppShell> {
         body: json.encode({}),
       );
       if (response.statusCode == 200) {
-        setState(() => isSaving = true);
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final status = data['status'] as String? ?? '';
+        setState(() {
+          isSaving = status == 'Started collecting data' ||
+              status == 'Already collecting data';
+        });
+        if (mounted && status == 'Already collecting data') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Zapis już trwa w tle')),
+          );
+        }
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Błąd uruchamiania zapisu (${response.statusCode}): ${response.body}',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

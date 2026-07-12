@@ -7,14 +7,15 @@ services:
     container_name: srp-proxy
     network_mode: host
     volumes:
-      - ./desktop/data/csv:/app/desktop/data/csv
-      - ./logs:/app/logs
+      - ${CSV_DATA_DIR}:/app/desktop/data/csv
+      - ${LOGS_DIR}:/app/logs
     cap_add:
       - NET_ADMIN
     environment:
       MULTICAST_GROUP: ${MULTICAST_GROUP}
       INTERFACE_IP: ${INTERFACE_IP}
       SD_PORT: ${SD_PORT}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     restart: unless-stopped
 
   desktop:
