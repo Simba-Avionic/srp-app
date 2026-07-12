@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:desktop/services/base.dart';
+import 'package:desktop/services/csv_download.dart';
 
 import 'csv_data_screen.dart';
 
@@ -66,7 +67,7 @@ class Sidebar extends StatelessWidget {
           const SizedBox(height: 10),
           ListTile(
             leading: const Icon(Icons.file_open, color: Colors.white),
-            title: const Text('data.csv', style: TextStyle(color: Colors.white)),
+            title: const Text('Podgląd CSV', style: TextStyle(color: Colors.white)),
             onTap: () async {
               final csvRows = await getCsvFileContent();
               if (!context.mounted) {
@@ -78,6 +79,21 @@ class Sidebar extends StatelessWidget {
                   builder: (context) => CsvDataScreen(csvRows: csvRows),
                 ),
               );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.download, color: Colors.white),
+            title: const Text('Pobierz CSV', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              try {
+                downloadCsvFile();
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Błąd pobierania: $e')),
+                  );
+                }
+              }
             },
           ),
         ],

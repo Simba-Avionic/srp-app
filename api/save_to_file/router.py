@@ -4,7 +4,8 @@ import os
 from typing import Callable
 from loguru import logger
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from datetime import datetime
 
 from proxy.app.services.engineservice import EngineServiceManager
@@ -218,6 +219,18 @@ async def get_csv_data():
     with open(csv_filename, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         return {"rows": list(reader)}
+
+
+@save_router.get("/download")
+async def download_csv():
+    if not os.path.exists(csv_filename):
+        raise HTTPException(status_code=404, detail="CSV file not found")
+
+    return FileResponse(
+        csv_filename,
+        media_type="text/csv",
+        filename="data.csv",
+    )
 
 
 @save_router.get("/status")
