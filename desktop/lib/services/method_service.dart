@@ -11,7 +11,7 @@ class MethodService {
     String? input,
   }) async {
     final Uri url = Uri.parse(
-      '$base_url/${namespace.toLowerCase()}/${methodName.toLowerCase()}',
+      apiUrl('/${namespace.toLowerCase()}/${methodName.toLowerCase()}'),
     );
 
     final Map<String, dynamic> body = inType != 'void' ? {methodName.toLowerCase(): input} : {};

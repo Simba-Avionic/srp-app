@@ -1,6 +1,7 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
 import 'dart:convert';
+import 'package:desktop/services/base.dart';
 
 class EventService {
   late IO.Socket _socket;
@@ -11,7 +12,7 @@ class EventService {
     _event = event;
 
     _socket = IO.io(
-      'http://localhost:5000/$namespace',
+      apiUrl('/$namespace'),
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .build(),

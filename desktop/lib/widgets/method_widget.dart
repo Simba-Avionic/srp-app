@@ -185,31 +185,8 @@ class _MethodWidgetState extends State<MethodWidget> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 16),
               ],
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () => _sendRequest(),
-                    style: _actionButtonStyle(context),
-                    child: const Text(
-                      "SEND",
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      _result,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ],
         ],
       ),
