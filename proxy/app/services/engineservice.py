@@ -12,7 +12,6 @@ from someipy import (
 )
 from proxy.app.settings import INTERFACE_IP
 from proxy.app.dataclasses.engineservice_dataclass import CurrentModeOut
-from proxy.app.dataclasses.engineservice_dataclass import StartIn
 from proxy.app.dataclasses.engineservice_dataclass import SetModeIn
 
 class EngineServiceManager:
@@ -56,7 +55,7 @@ class EngineServiceManager:
         self.instance = await construct_client_service_instance(
             service=engineservice,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10297),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10322),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -81,14 +80,6 @@ class EngineServiceManager:
 
     def get_currentmode(self):
         return self.currentmode
-    
-    async def Start(self):
-        await self.find_service()
-        method_result = await self.instance.call_method(
-            1, b''
-        )
-    
-        return method_result
     
     async def SetMode(self, setmode):
         await self.find_service()

@@ -66,33 +66,49 @@ def register_envapp_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
     
-    @sio.on('newdpressevent', namespace=namespace)
-    async def get_newdpressevent(sid, data):
+    @sio.on('newchamberpressevent1', namespace=namespace)
+    async def get_newchamberpressevent1(sid, data):
         try:
             manager = EnvAppManager()
-            response = manager.get_newdpressevent()
-            await sio.emit('newdpressevent', 
-                          {'event_name': 'newdpressevent', 'response': response},
+            response = manager.get_newchamberpressevent1()
+            await sio.emit('newchamberpressevent1', 
+                          {'event_name': 'newchamberpressevent1', 'response': response},
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling event newdpressevent: %s", e)
+            logger.exception("Error handling event newchamberpressevent1: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
                           namespace=namespace)
     
-    @sio.on('newpressevent', namespace=namespace)
-    async def get_newpressevent(sid, data):
+    @sio.on('newoxidizerpressevent', namespace=namespace)
+    async def get_newoxidizerpressevent(sid, data):
         try:
             manager = EnvAppManager()
-            response = manager.get_newpressevent()
-            await sio.emit('newpressevent', 
-                          {'event_name': 'newpressevent', 'response': response},
+            response = manager.get_newoxidizerpressevent()
+            await sio.emit('newoxidizerpressevent', 
+                          {'event_name': 'newoxidizerpressevent', 'response': response},
                           room=sid,
                           namespace=namespace)
         except Exception as e:
-            logger.exception("Error handling event newpressevent: %s", e)
+            logger.exception("Error handling event newoxidizerpressevent: %s", e)
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    
+    @sio.on('newpressurefeedpressevent', namespace=namespace)
+    async def get_newpressurefeedpressevent(sid, data):
+        try:
+            manager = EnvAppManager()
+            response = manager.get_newpressurefeedpressevent()
+            await sio.emit('newpressurefeedpressevent', 
+                          {'event_name': 'newpressurefeedpressevent', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            logger.exception("Error handling event newpressurefeedpressevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,
@@ -141,22 +157,6 @@ def register_envapp_socketio(sio: AsyncServer):
                           namespace=namespace)
         except Exception as e:
             logger.exception("Error handling event newtempevent_3: %s", e)
-            await sio.emit('event_error',
-                          {'error': str(e)},
-                          room=sid,
-                          namespace=namespace)
-    
-    @sio.on('newtensoevent', namespace=namespace)
-    async def get_newtensoevent(sid, data):
-        try:
-            manager = EnvAppManager()
-            response = manager.get_newtensoevent()
-            await sio.emit('newtensoevent', 
-                          {'event_name': 'newtensoevent', 'response': response},
-                          room=sid,
-                          namespace=namespace)
-        except Exception as e:
-            logger.exception("Error handling event newtensoevent: %s", e)
             await sio.emit('event_error',
                           {'error': str(e)},
                           room=sid,

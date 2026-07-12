@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
-from proxy.app.dataclasses.servoservice_dataclass import (ReadMainServoValueOut, SetVentServoValueOut, ReadDumpValueOut, SetDumpValueOut, ReadVentServoValueOut, SetMainServoValueOut)
+from proxy.app.dataclasses.servoservice_dataclass import (SetOxidizerVentValveOut, SetOxidizerDumpValveOut, SetOxidizerMainValveOut, SetPressureFeedVentValveOut, SetPressureFeedMainValveOut)
 from proxy.app.services.servoservice import ServoServiceManager
 from api.common import process_method_result
 
@@ -12,85 +12,71 @@ router = APIRouter(
 )
 
 
-@router.post("/readdumpvalue")
-async def readdumpvalue(data: dict = Body(...)):
+@router.post("/setoxidizerdumpvalve")
+async def setoxidizerdumpvalve(data: dict = Body(...)):
     try:
         service_manager = ServoServiceManager()
         params = data or {}
-        method_result = await service_manager.ReadDumpValue(**params)
-        return process_method_result(method_result, deserialization_class=ReadDumpValueOut)
+        method_result = await service_manager.SetOxidizerDumpValve(**params)
+        return process_method_result(method_result, deserialization_class=SetOxidizerDumpValveOut)
     except Exception as e:
-        logger.exception("Error in readdumpvalue handler: %s", e)
+        logger.exception("Error in setoxidizerdumpvalve handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
         )
 
-@router.post("/readmainservovalue")
-async def readmainservovalue(data: dict = Body(...)):
+@router.post("/setoxidizermainvalve")
+async def setoxidizermainvalve(data: dict = Body(...)):
     try:
         service_manager = ServoServiceManager()
         params = data or {}
-        method_result = await service_manager.ReadMainServoValue(**params)
-        return process_method_result(method_result, deserialization_class=ReadMainServoValueOut)
+        method_result = await service_manager.SetOxidizerMainValve(**params)
+        return process_method_result(method_result, deserialization_class=SetOxidizerMainValveOut)
     except Exception as e:
-        logger.exception("Error in readmainservovalue handler: %s", e)
+        logger.exception("Error in setoxidizermainvalve handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
         )
 
-@router.post("/readventservovalue")
-async def readventservovalue(data: dict = Body(...)):
+@router.post("/setoxidizerventvalve")
+async def setoxidizerventvalve(data: dict = Body(...)):
     try:
         service_manager = ServoServiceManager()
         params = data or {}
-        method_result = await service_manager.ReadVentServoValue(**params)
-        return process_method_result(method_result, deserialization_class=ReadVentServoValueOut)
+        method_result = await service_manager.SetOxidizerVentValve(**params)
+        return process_method_result(method_result, deserialization_class=SetOxidizerVentValveOut)
     except Exception as e:
-        logger.exception("Error in readventservovalue handler: %s", e)
+        logger.exception("Error in setoxidizerventvalve handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
         )
 
-@router.post("/setdumpvalue")
-async def setdumpvalue(data: dict = Body(...)):
+@router.post("/setpressurefeedmainvalve")
+async def setpressurefeedmainvalve(data: dict = Body(...)):
     try:
         service_manager = ServoServiceManager()
         params = data or {}
-        method_result = await service_manager.SetDumpValue(**params)
-        return process_method_result(method_result, deserialization_class=SetDumpValueOut)
+        method_result = await service_manager.SetPressureFeedMainValve(**params)
+        return process_method_result(method_result, deserialization_class=SetPressureFeedMainValveOut)
     except Exception as e:
-        logger.exception("Error in setdumpvalue handler: %s", e)
+        logger.exception("Error in setpressurefeedmainvalve handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
         )
 
-@router.post("/setmainservovalue")
-async def setmainservovalue(data: dict = Body(...)):
+@router.post("/setpressurefeedventvalve")
+async def setpressurefeedventvalve(data: dict = Body(...)):
     try:
         service_manager = ServoServiceManager()
         params = data or {}
-        method_result = await service_manager.SetMainServoValue(**params)
-        return process_method_result(method_result, deserialization_class=SetMainServoValueOut)
+        method_result = await service_manager.SetPressureFeedVentValve(**params)
+        return process_method_result(method_result, deserialization_class=SetPressureFeedVentValveOut)
     except Exception as e:
-        logger.exception("Error in setmainservovalue handler: %s", e)
-        return JSONResponse(
-            status_code=500,
-            content={"error": str(e)}
-        )
-
-@router.post("/setventservovalue")
-async def setventservovalue(data: dict = Body(...)):
-    try:
-        service_manager = ServoServiceManager()
-        params = data or {}
-        method_result = await service_manager.SetVentServoValue(**params)
-        return process_method_result(method_result, deserialization_class=SetVentServoValueOut)
-    except Exception as e:
-        logger.exception("Error in setventservovalue handler: %s", e)
+        logger.exception("Error in setpressurefeedventvalve handler: %s", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

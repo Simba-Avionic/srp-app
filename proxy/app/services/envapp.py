@@ -11,15 +11,17 @@ from someipy import (
     EventGroup
 )
 from proxy.app.settings import INTERFACE_IP
+from proxy.app.pressure import pressure_from_raw
+from proxy.app.temperature import temperature_from_raw
 from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_1Out
 from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_2Out
 from proxy.app.dataclasses.envapp_dataclass import NewTempEvent_3Out
-from proxy.app.dataclasses.envapp_dataclass import NewPressEventOut
-from proxy.app.dataclasses.envapp_dataclass import NewDPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import NewOxidizerPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import NewPressureFeedPressEventOut
+from proxy.app.dataclasses.envapp_dataclass import NewChamberPressEvent1Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent1Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent2Out
 from proxy.app.dataclasses.envapp_dataclass import NewBoardTempEvent3Out
-from proxy.app.dataclasses.envapp_dataclass import NewTensoEventOut
 
 class EnvAppManager:
     __instance = None
@@ -37,12 +39,12 @@ class EnvAppManager:
             self.newtempevent_1 = None
             self.newtempevent_2 = None
             self.newtempevent_3 = None
-            self.newpressevent = None
-            self.newdpressevent = None
+            self.newoxidizerpressevent = None
+            self.newpressurefeedpressevent = None
+            self.newchamberpressevent1 = None
             self.newboardtempevent1 = None
             self.newboardtempevent2 = None
             self.newboardtempevent3 = None
-            self.newtensoevent = None
 
     async def find_service(self):
         try:
@@ -70,7 +72,7 @@ class EnvAppManager:
         self.instance = await construct_client_service_instance(
             service=envapp,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10295),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10320),
             ttl=5,
             sd_sender=self.service_discovery,
             protocol=TransportLayerProtocol.UDP,
@@ -85,63 +87,63 @@ class EnvAppManager:
             case 32769:
                 try:
                     newTempEvent_1_msg = NewTempEvent_1Out().deserialize(someip_message.payload)
-                    self.newtempevent_1 = newTempEvent_1_msg.data.value
+                    self.newtempevent_1 = temperature_from_raw(newTempEvent_1_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32770:
                 try:
                     newTempEvent_2_msg = NewTempEvent_2Out().deserialize(someip_message.payload)
-                    self.newtempevent_2 = newTempEvent_2_msg.data.value
+                    self.newtempevent_2 = temperature_from_raw(newTempEvent_2_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32771:
                 try:
                     newTempEvent_3_msg = NewTempEvent_3Out().deserialize(someip_message.payload)
-                    self.newtempevent_3 = newTempEvent_3_msg.data.value
+                    self.newtempevent_3 = temperature_from_raw(newTempEvent_3_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32772:
                 try:
-                    newPressEvent_msg = NewPressEventOut().deserialize(someip_message.payload)
-                    self.newpressevent = newPressEvent_msg.data.value
+                    newOxidizerPressEvent_msg = NewOxidizerPressEventOut().deserialize(someip_message.payload)
+                    self.newoxidizerpressevent = pressure_from_raw(newOxidizerPressEvent_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32773:
                 try:
-                    newDPressEvent_msg = NewDPressEventOut().deserialize(someip_message.payload)
-                    self.newdpressevent = newDPressEvent_msg.data.value
+                    newPressureFeedPressEvent_msg = NewPressureFeedPressEventOut().deserialize(someip_message.payload)
+                    self.newpressurefeedpressevent = pressure_from_raw(newPressureFeedPressEvent_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32774:
                 try:
-                    newBoardTempEvent1_msg = NewBoardTempEvent1Out().deserialize(someip_message.payload)
-                    self.newboardtempevent1 = newBoardTempEvent1_msg.data.value
+                    newChamberPressEvent1_msg = NewChamberPressEvent1Out().deserialize(someip_message.payload)
+                    self.newchamberpressevent1 = pressure_from_raw(newChamberPressEvent1_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32775:
                 try:
-                    newBoardTempEvent2_msg = NewBoardTempEvent2Out().deserialize(someip_message.payload)
-                    self.newboardtempevent2 = newBoardTempEvent2_msg.data.value
+                    newBoardTempEvent1_msg = NewBoardTempEvent1Out().deserialize(someip_message.payload)
+                    self.newboardtempevent1 = temperature_from_raw(newBoardTempEvent1_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32776:
                 try:
-                    newBoardTempEvent3_msg = NewBoardTempEvent3Out().deserialize(someip_message.payload)
-                    self.newboardtempevent3 = newBoardTempEvent3_msg.data.value
+                    newBoardTempEvent2_msg = NewBoardTempEvent2Out().deserialize(someip_message.payload)
+                    self.newboardtempevent2 = temperature_from_raw(newBoardTempEvent2_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
             case 32777:
                 try:
-                    newTensoEvent_msg = NewTensoEventOut().deserialize(someip_message.payload)
-                    self.newtensoevent = newTensoEvent_msg.data.value
+                    newBoardTempEvent3_msg = NewBoardTempEvent3Out().deserialize(someip_message.payload)
+                    self.newboardtempevent3 = temperature_from_raw(newBoardTempEvent3_msg.data.value)
                 except Exception as e:
                     logger.exception(f"Error in deserialization: {e}")
     
@@ -158,11 +160,14 @@ class EnvAppManager:
     def get_newtempevent_3(self):
         return self.newtempevent_3
     
-    def get_newpressevent(self):
-        return self.newpressevent
+    def get_newoxidizerpressevent(self):
+        return self.newoxidizerpressevent
     
-    def get_newdpressevent(self):
-        return self.newdpressevent
+    def get_newpressurefeedpressevent(self):
+        return self.newpressurefeedpressevent
+    
+    def get_newchamberpressevent1(self):
+        return self.newchamberpressevent1
     
     def get_newboardtempevent1(self):
         return self.newboardtempevent1
@@ -172,9 +177,6 @@ class EnvAppManager:
     
     def get_newboardtempevent3(self):
         return self.newboardtempevent3
-    
-    def get_newtensoevent(self):
-        return self.newtensoevent
     
 async def initialize_envapp(sd):
     service_manager = EnvAppManager()

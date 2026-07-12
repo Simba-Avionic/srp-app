@@ -5,6 +5,7 @@ from someipy.serialization import (
 )
 from .structs import (
     BME280DataStructure,
+    IMUDataStructure,
 )
 
 @dataclass
@@ -42,6 +43,19 @@ class NewBME280EventOut(SomeIpPayload):
     data: BME280DataStructure
     def __init__(self):
         self.data = BME280DataStructure()
+
+    def from_json(self, json_argument):
+        self.data.from_json(json_argument)
+
+    def deserialize(self, payload: bytes):
+        self.data.deserialize(payload)
+        return self
+
+@dataclass
+class NewIMUEventOut(SomeIpPayload):
+    data: IMUDataStructure
+    def __init__(self):
+        self.data = IMUDataStructure()
 
     def from_json(self, json_argument):
         self.data.from_json(json_argument)

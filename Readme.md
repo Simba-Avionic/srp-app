@@ -52,71 +52,202 @@ Created with Flutter and Dart.
 * It receives responses or events from the Server and presents them to the user.
 
 **Parsing json files**  
-Application is designed to be auto generated on the base of JSON files .In order to achieve auto-generated result files go to proxy/parsers and generate desired files:
+Application is designed to be auto generated on the base of JSON files. In order to achieve auto-generated result files go to `proxy/parsers` and generate desired files.
 
-**1\. Generating dataclasses:**   
-Go to json\_to\_dataclass.py, verify that the path to system definition is right. Generate all the files automatically. In case of an issue generate each file by one one. Go to files after generation to verify if there are not any errors. Especially import errors
+### Dodawanie nowego serwisu (package)
 
-**2\.  Generating services:**  
-	Analogically as dataclasses in every aspect. Remember to verify for errors
+Nowy „package” w tym projekcie to **nowy serwis SOME/IP** zdefiniowany w `system_definition/`. Na jego podstawie generowany jest kod backendu (proxy + API) i dane frontendu (Flutter).
 
-**3\. Generating apis:**  
-Step 1: Go to gen\_api.py and generate each file one by one through manager import. Step 2: Verify for any potential errors in the created files.  
-Step 3: Inside app.py import all generated: routers, socketio registers and initializers from the service files as in:
+#### Krok 1 — Definicja w `system_definition`
 
-*from api.engineservice.socketio import register\_engineservice\_socketio*  
-*from api.engineservice.router import router as engine\_router*   
-*NAME THE ROUTER*  
-*from proxy.app.services.engineservice import initialize\_engineservice*
+Utwórz katalog z plikami JSON, wzorując się na istniejących serwisach, np. `system_definition/someip/engine_service/`.
 
-Step 4: Include new routers as in:  
-app.include\_router(engine\_router)
+**`service.json`** — główna definicja serwisu:
 
-Step 5: Register socketio namespaces as in:  
-	*register\_engineservice\_socketio(sio)*
+```json
+{
+    "include": [],
+    "package": "srp.apps",
+    "someip": {
+        "EngineService": {
+            "service_id": 518,
+            "major_version": 1,
+            "minor_version": 0,
+            "methods": { ... },
+            "events": { ... }
+        }
+    }
+}
+```
 
-Step 6: Register manager runners:  
-*async def run\_engine\_service\_manager(sd):*  
-  	  *await initialize\_engineservice(sd)*
+| Pole | Co ustawić | Dlaczego |
+|------|------------|----------|
+| `package` | Namespace logiczny, np. `srp.apps`, `srp.env` | Grupuje definicje w systemie; musi być spójny z powiązanymi plikami `*_data_type.json` w tym samym obszarze (oxidizer EC, FC itd.) |
+| `someip.<NazwaSerwisu>` | Unikalna nazwa klasy serwisu, np. `EngineService` | Z niej powstają pliki `engineservice.py`, `engineservice_dataclass.py`, namespace API `/engineservice` |
+| `service_id` | ID z definicji ECU | Musi odpowiadać ID serwisu na docelowym komputerze — inaczej Service Discovery nie znajdzie ECU |
+| `methods` / `events` | ID, typy wejścia/wyjścia | Określają REST endpointy (`POST /serwis/metoda`) i eventy Socket.IO |
 
-Step 7: Run managers as background tasks inside lifespan function:  
- *asyncio.create\_task(run\_engine\_service\_manager(sd\_instance))*
+Jeśli serwis używa złożonych struktur danych, dodaj też plik `*_data_type.json` w tym samym katalogu (wzór: `sys_stat_data_type.json`).
 
-**4\. Adjusting frontend for changes**
+#### Krok 2 — Generowanie kodu backendu
 
-1. Go to generate/generate\_data.dart and pass the correct file path.  
-2. Run THE FILE, not the project  
-3. Copy the output from the console  
-4. Go to home.dart and paste the copied data  
-       final Map\<String, dynamic\> engineService \= {  
-         "serviceName": "Engine Service",  
-         "serviceId": 518,  
-         "methods": \[  
-           {"name": "Start", "id": 1, "in\_type": "void"},  
-           {"name": "SetMode", "id": 2, "in\_type": "uint8"},  
-         \],  
-         "events": \[  
-           {"name": "CurrentMode", "id": 32769},  
-         \],  
-       };  
-     
-5. Create a new service widget and add it to the home widget. Max two per row, separate rows with sizedbox of height 10px
+Uruchamiaj skrypty z aktywnym venv, z katalogu głównego projektu. **Przed uruchomieniem** ustaw ścieżkę do `system_definition/someip` w bloku `if __name__ == "__main__"` każdego parsera (domyślnie w repo mogą być stare ścieżki):
 
-                ServiceWidget(  
-                  serviceName: engineService\['serviceName'\],  
-                  serviceId: engineService\['serviceId'\],  
-                  methods: engineService\['methods'\],  
-                  events: engineService\['events'\],  
-                ),
+```python
+process_directory(Path(__file__).resolve().parent / "../../system_definition/someip")
+```
+
+**1. Generating dataclasses** (`proxy/parsers/json_to_dataclass.py`):
+- generuje `proxy/app/dataclasses/<serwis>_dataclass.py` i `structs.py`
+- po generacji sprawdź importy i typy
+
+**2. Generating services** (`proxy/parsers/json_to_service_class.py`):
+- generuje `proxy/app/services/<serwis>.py` (manager SOME/IP)
+- **automatycznie inkrementuje `NEXT_PORT`** w `proxy/app/config.json` — każdy nowy serwis dostaje kolejny port UDP lokalny (10319, 10320, …)
+- po generacji zweryfikuj przypisany port w wygenerowanym pliku
+
+**3. Generating APIs** (`proxy/parsers/gen_api.py`):
+- dodaj import nowego `*Manager` do listy `manager_classes`
+- uruchom skrypt — generuje `api/<serwis>/router.py` i `api/<serwis>/socketio.py`
+
+#### Krok 3 — Podpięcie w `api/app.py`
+
+Dla każdego nowego serwisu:
+
+```python
+from api.<serwis>.router import router as <serwis>_router
+from api.<serwis>.socketio import register_<serwis>_socketio
+from proxy.app.services.<serwis> import initialize_<serwis>
+```
+
+Następnie:
+1. `app.include_router(<serwis>_router)` — tylko jeśli serwis ma metody (router)
+2. `register_<serwis>_socketio(sio)` — jeśli serwis ma eventy
+3. Dodaj `async def run_<serwis>(sd): await initialize_<serwis>(sd)`
+4. W `lifespan` dodaj `asyncio.create_task(run_<serwis>(sd_instance))` oraz obsługę `cancel` przy shutdown
+
+#### Krok 4 — Frontend (Flutter)
+
+1. W `desktop/lib/generate/generate_data.dart` ustaw ścieżkę do `system_definition/someip`
+2. Uruchom **sam plik** (`dart run desktop/lib/generate/generate_data.dart`), nie cały projekt
+3. Skopiuj wyjście z konsoli
+4. Wklej mapę serwisu do `desktop/lib/views/home.dart` i dodaj `ServiceWidget`:
+
+```dart
+ServiceWidget(
+  serviceName: engineService['serviceName'],
+  serviceId: engineService['serviceId'],
+  methods: engineService['methods'],
+  events: engineService['events'],
+),
+```
+
+Maksymalnie 2 widgety w rzędzie; między rzędami `SizedBox(height: 10)`.
+
+#### Krok 5 — Docker / nginx (jeśli używasz kontenerów)
+
+Po dodaniu serwisu z metodami lub eventami dopisz jego namespace (małymi literami) do regex w `desktop/nginx/nginx.conf.template`, np.:
+
+```
+location ~ ^/(engineservice|...|nowyserwis|save)(/.*)?$ {
+```
+
+Bez tego nginx nie przekieruje ruchu API/WebSocket do proxy i UI nie połączy się z nowym serwisem.
+
+#### Krok 6 — Weryfikacja
+
+- Uruchom backend i sprawdź logi w `logs/`
+- Dla testów lokalnych bez ECU: `proxy/app/testing/` (dostępne mocki engine i env)
+- Pamiętaj: **brak walidacji typów** na wejściu metod — podawaj poprawne typy zgodnie z `service.json`
+
+---
 
 **Adjusting server**
 
-- Create virtual environment in srp-app directory, activate it and install requirements.txt  
-- To assign ports and ip address go to config.jsons  
-- Verify server and desktop app are communicating via the same IP address
+- Create virtual environment in srp-app directory, activate it and install requirements.txt
 
-**Running application**  
-After successfully adjusting the server. Run the server and the desktop application separately
+### Konfiguracja sieci i proxy
+
+Proxy komunikuje się z ECU wyłącznie przez **UDP** (multicast Service Discovery + unicast metody/eventy). Konfiguracja steruje tym, na jakim interfejsie i adresach nasłuchuje proces Pythona.
+
+#### Uruchomienie lokalne (bez Dockera)
+
+Edytuj `proxy/app/config.json`:
+
+| Parametr | Przykład | Co robi | Dlaczego to ustawić |
+|----------|----------|---------|---------------------|
+| `MULTICAST_GROUP` | `224.224.224.245` | Adres multicast SOME/IP SD | Musi być zgodny z siecią ECU i biblioteką someipy |
+| `INTERFACE_IP` | `192.168.10.49` | IP interfejsu, na którym proxy binduje porty UDP (10319–10335) | **Najważniejszy parametr** — ustaw IP maszyny (np. RPi) w sieci, w której siedzą ECU |
+| `INTERFACE_IP_FINAL` | `10.101.0.1` | Zarezerwowane na przyszłość | Obecnie nieużywane w kodzie, można zostawić domyślne |
+| `SD_PORT` | `30490` | Port Service Discovery | Standardowy port SOME/IP SD |
+| `NEXT_PORT` | `10260` | Licznik portów dla generatora serwisów | Inkrementowany automatycznie przez `json_to_service_class.py`; ręczna zmiana potrzebna tylko przy konfliktach portów |
+
+**Przed startem** na hoście (wymagane przez someipy):
+
+```bash
+sudo ip addr add 224.224.224.245 dev lo autojoin
+```
+
+Dla testów dwóch instancji na jednej maszynie:
+
+```bash
+sudo ip addr add 127.0.0.2/24 dev lo
+```
+
+#### Uruchomienie przez Docker
+
+Konfiguracja jest w `docker-compose.yml` (sekcja `proxy.environment`). Wartości można nadpisać plikiem `.env` w katalogu projektu:
+
+```env
+INTERFACE_IP=192.168.10.49
+MULTICAST_GROUP=224.224.224.245
+SD_PORT=30490
+DESKTOP_PORT=8080
+```
+
+| Parametr | Domyślnie | Dlaczego |
+|----------|-----------|----------|
+| `INTERFACE_IP` | `192.168.10.49` | W trybie `network_mode: host` proxy używa interfejsów hosta — ustaw IP RPi w LAN ECU |
+| `MULTICAST_GROUP` | `224.224.224.245` | Używany też w entrypoincie kontenera do dodania adresu na `lo` |
+| `SD_PORT` | `30490` | Port SOME/IP Service Discovery |
+| `NEXT_PORT` | `10260` | Dla generatorów kodu; w runtime nie jest krytyczny |
+| `DESKTOP_PORT` | `8080` | Port nginx z aplikacją Flutter web |
+
+**Dlaczego proxy ma `network_mode: host`?**  
+SOME/IP wymaga UDP multicast na fizycznym interfejsie. W sieci bridge Dockera multicast do ECU zwykle nie działa poprawnie. Kontener desktop pozostaje w sieci bridge i proxuje API do `host.docker.internal:5000`.
+
+**Wolumeny:**
+- `./desktop/data/csv` — zapis danych CSV z przycisku „Save Data”
+- `./logs` — logi błędów aplikacji
+
+- Verify server and desktop app are communicating via the same address (lokalnie: `localhost:5000`; Docker: UI na porcie 8080, API proxowane przez nginx)
+
+**Running application**
+
+#### Lokalnie (Makefile)
+
+```bash
+# Backend + web przez nginx systemowy
+make run-all
+
+# Backend + natywna aplikacja Linux
+make run-all-desktop
+
+# Tylko backend (API na :5000)
+make run-proxy
+```
+
+#### Docker
+
+```bash
+docker compose up --build -d
+```
+
+- **UI:** `http://<IP-hosta>:8080`
+- **API bezpośrednio:** `http://<IP-hosta>:5000`
+
+Aplikacja web w kontenerze łączy się z API przez nginx (ten sam origin). Przy developmencie poza Dockerem domyślny adres API to `http://localhost:5000` (`desktop/lib/services/base.dart`).
+
 
 **Additional informations:**  
 Saved data is in desktop/data/csv/data.csv . Verify it is saving correctly, as saving is done as a background task with yield so data shall appear already while saving.

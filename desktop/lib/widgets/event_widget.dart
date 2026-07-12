@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:desktop/services/event_service.dart';
+import 'package:desktop/utils/format_utils.dart';
+import 'package:desktop/utils/moving_average.dart';
 
 class EventWidget extends StatefulWidget {
   final String eventName;
@@ -10,7 +12,7 @@ class EventWidget extends StatefulWidget {
     super.key,
     required this.eventName,
     required this.eventId,
-    required this.namespace
+    required this.namespace,
   });
 
   @override
@@ -19,72 +21,71 @@ class EventWidget extends StatefulWidget {
 
 class _EventWidgetState extends State<EventWidget> {
   final EventService eventService = EventService();
-  String response = "No response yet";
+  String response = "-";
+  MovingAverage? _movingAverage;
+
+  bool get _isPressureEvent =>
+      widget.eventName.toLowerCase().contains('pressevent');
 
   @override
   void initState() {
     super.initState();
-    eventService.initializeSocket(widget.namespace, widget.eventName.toLowerCase());
+    if (_isPressureEvent) {
+      _movingAverage = MovingAverage(40);
+    }
+    eventService.initializeSocket(
+        widget.namespace, widget.eventName.toLowerCase());
     eventService.connect();
 
     eventService.onEventResponse((msg) {
       setState(() {
-        response = msg;
+        response = _formatEventValue(msg);
       });
     });
   }
 
+  String _formatEventValue(dynamic msg) {
+    if (_isPressureEvent) {
+      final parsed = parseNumericValue(msg);
+      if (parsed != null) {
+        if (_movingAverage != null) {
+          return formatDisplayValue(_movingAverage!.add(parsed));
+        }
+        return formatDisplayValue(parsed);
+      }
+    }
+    return formatDisplayValue(msg);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 4.0,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.data_object_rounded, color: Colors.black54),
-              const SizedBox(width: 8),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "${widget.eventName}\n",
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 20,
-                      ),
-                    ),
-                    TextSpan(
-                      text: "Event ID: ${widget.eventId}",
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
+          Expanded(
+            flex: 5,
+            child: Text(
+              widget.eventName,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            "Result: $response",
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 20,
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 4,
+            child: Text(
+              response,
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
         ],

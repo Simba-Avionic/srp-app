@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from someipy.serialization import (
     SomeIpPayload,
-    Float32,
     Sint16,
-    Uint16,
 )
 
 @dataclass
@@ -37,20 +35,30 @@ class NewTempEvent_3Out(SomeIpPayload):
 
 
 @dataclass
-class NewPressEventOut(SomeIpPayload):
-    data: Uint16
+class NewOxidizerPressEventOut(SomeIpPayload):
+    data: Sint16
     def __init__(self):
-        self.data = Uint16()
+        self.data = Sint16()
 
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
 
 
 @dataclass
-class NewDPressEventOut(SomeIpPayload):
-    data: Uint16
+class NewPressureFeedPressEventOut(SomeIpPayload):
+    data: Sint16
     def __init__(self):
-        self.data = Uint16()
+        self.data = Sint16()
+
+    def from_json(self, json_argument):
+        self.data.value = int(json_argument)
+
+
+@dataclass
+class NewChamberPressEvent1Out(SomeIpPayload):
+    data: Sint16
+    def __init__(self):
+        self.data = Sint16()
 
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
@@ -84,13 +92,3 @@ class NewBoardTempEvent3Out(SomeIpPayload):
 
     def from_json(self, json_argument):
         self.data.value = int(json_argument)
-
-
-@dataclass
-class NewTensoEventOut(SomeIpPayload):
-    data: Float32
-    def __init__(self):
-        self.data = Float32()
-
-    def from_json(self, json_argument):
-        self.data.value = float(json_argument)

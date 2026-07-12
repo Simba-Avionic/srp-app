@@ -82,3 +82,19 @@ def register_envappfc_socketio(sio: AsyncServer):
                           room=sid,
                           namespace=namespace)
     
+    @sio.on('newimuevent', namespace=namespace)
+    async def get_newimuevent(sid, data):
+        try:
+            manager = EnvAppFcManager()
+            response = manager.get_newimuevent()
+            await sio.emit('newimuevent', 
+                          {'event_name': 'newimuevent', 'response': response},
+                          room=sid,
+                          namespace=namespace)
+        except Exception as e:
+            logger.exception("Error handling event newimuevent: %s", e)
+            await sio.emit('event_error',
+                          {'error': str(e)},
+                          room=sid,
+                          namespace=namespace)
+    

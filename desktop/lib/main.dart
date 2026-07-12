@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:desktop/views/home.dart';
 import 'package:desktop/widgets/sidebar_widget.dart';
 import 'package:http/http.dart' as http;
+import 'package:desktop/services/base.dart';
 
 void main() {
   runApp(const MyApp());
@@ -87,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
         try {
           final body = {};
           final response = await http.post(
-            Uri.parse('http://localhost:5000/save/stop'),
+            Uri.parse(apiUrl('/save/stop')),
             headers: {
               'Content-Type': 'application/json',
             },
@@ -111,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
       try {
         final body = {};
         final response = await http.post(
-          Uri.parse('http://localhost:5000/save/start'),
+          Uri.parse(apiUrl('/save/start')),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -158,7 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Sidebar(),
             ),
             Expanded(
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: SingleChildScrollView(
                   child: Home(),
                 ),

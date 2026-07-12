@@ -2,15 +2,21 @@ import os
 
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
-from proxy.app.services.servoservice import ServoServiceManager
-from proxy.app.services.primerservice import PrimerServiceManager
-from proxy.app.services.gpsservice import GPSServiceManager
-from proxy.app.services.mainservice import MainServiceManager
-from proxy.app.services.fileloggerapp import FileLoggerAppManager
-from proxy.app.services.recoveryservice import RecoveryServiceManager
 from proxy.app.services.sysstatservice import SysStatServiceManager
+from proxy.app.services.fileloggerapp import FileLoggerAppManager
+from proxy.app.services.fcradioservice import FcRadioServiceManager
+from proxy.app.services.servoservice import ServoServiceManager
+from proxy.app.services.secenvapp import SecEnvAppManager
+from proxy.app.services.secservoservice import SecServoServiceManager
 from proxy.app.services.envappfc import EnvAppFcManager
 from proxy.app.services.fcsysstatservice import FcSysStatServiceManager
+from proxy.app.services.apogeedetectservice import ApogeeDetectServiceManager
+from proxy.app.services.recoveryservice import RecoveryServiceManager
+from proxy.app.services.fcfileloggerapp import FcFileLoggerAppManager
+from proxy.app.services.radioservice import RadioServiceManager
+from proxy.app.services.gpsservice import GPSServiceManager
+from proxy.app.services.mainservice import MainServiceManager
+from proxy.app.services.primerservice import PrimerServiceManager
 
 API_BASE_DIR = os.path.join(os.path.dirname(__file__), "../../api")
 
@@ -153,16 +159,21 @@ if __name__ == "__main__":
     manager_classes = [
         EngineServiceManager,
         EnvAppManager,
-        EnvAppFcManager,
+        SysStatServiceManager,
+        FileLoggerAppManager,
+        FcRadioServiceManager,
         ServoServiceManager,
-        PrimerServiceManager,
+        SecEnvAppManager,
+        SecServoServiceManager,
+        EnvAppFcManager,
+        FcSysStatServiceManager,
+        ApogeeDetectServiceManager,
+        RecoveryServiceManager,
+        FcFileLoggerAppManager,
+        RadioServiceManager,
         GPSServiceManager,
         MainServiceManager,
-        FileLoggerAppManager,
-        RecoveryServiceManager,
-        SysStatServiceManager,
-        RecoveryServiceManager,
-        FcSysStatServiceManager,
+        PrimerServiceManager,
     ]
 
     for ManagerClass in manager_classes:
