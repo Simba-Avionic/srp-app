@@ -7,6 +7,7 @@ class ServiceWidget extends StatelessWidget {
   final int serviceId;
   final List<Map<String, dynamic>>? methods;
   final List<Map<String, dynamic>>? events;
+  final bool readOnly;
 
   const ServiceWidget({
     super.key,
@@ -14,6 +15,7 @@ class ServiceWidget extends StatelessWidget {
     required this.serviceId,
     this.methods,
     this.events,
+    this.readOnly = true,
   });
 
   @override
@@ -49,7 +51,7 @@ class ServiceWidget extends StatelessWidget {
             "ID: $serviceId",
             style: const TextStyle(color: Colors.white70, fontSize: 11),
           ),
-          if (methods != null && methods!.isNotEmpty) ...[
+          if (!readOnly && methods != null && methods!.isNotEmpty) ...[
             const SizedBox(height: 10),
             ...methods!.map(
               (method) => MethodWidget(

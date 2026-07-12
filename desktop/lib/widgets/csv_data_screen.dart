@@ -1,6 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:csv/csv.dart';
+import 'package:desktop/services/csv_download.dart';
 import 'package:desktop/utils/format_utils.dart';
 
 class CsvDataScreen extends StatelessWidget {
@@ -20,8 +19,23 @@ class CsvDataScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CSV Data'),
+        title: const Text('Dane CSV'),
         backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          IconButton(
+            tooltip: 'Pobierz CSV',
+            icon: const Icon(Icons.download),
+            onPressed: () {
+              try {
+                downloadCsvFile();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Błąd pobierania: $e')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),

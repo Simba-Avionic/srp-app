@@ -1,12 +1,26 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:desktop/views/home.dart';
-import 'package:desktop/widgets/sidebar_widget.dart';
-import 'package:http/http.dart' as http;
-import 'package:desktop/services/base.dart';
+import 'package:desktop/services/admin_session.dart';
+import 'package:desktop/views/admin_login_page.dart';
+import 'package:desktop/views/app_shell.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+String _initialRoute() {
+  final fragment = Uri.base.fragment;
+  if (fragment == '/admin' ||
+      fragment == 'admin' ||
+      fragment.startsWith('/admin')) {
+    return '/admin';
+  }
+
+  final path = Uri.base.path;
+  if (path.endsWith('/admin')) {
+    return '/admin';
+  }
+
+  return '/';
 }
 
 class MyApp extends StatelessWidget {
@@ -42,145 +56,30 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Colors.black87),
         ),
       ),
-      home: const MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  bool isSaving = false;
-
-  void toggleSaving() async {
-    if (isSaving) {
-      bool? confirmStop = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Stop Saving Data?'),
-            content: const Text('Are you sure you want to stop saving data?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Yes', style: TextStyle(color: Colors.red),),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text('No',
-                  style: TextStyle(color: Colors.green),),
-              ),
-            ],
-          );
-        },
-      );
-
-      if (confirmStop == true) {
-        try {
-          final body = {};
-          final response = await http.post(
-            Uri.parse(apiUrl('/save/stop')),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(body),
-          );
-          if (response.statusCode == 200) {
-            final responseData = json.decode(response.body);
-            print("Stopped saving data... Response: $responseData");
-            setState(() {
-              isSaving = false;
-            });
-          } else {
-            print("Failed to stop saving data. Status: ${response.statusCode}, Body: ${response.body}");
-          }
-        } catch (e) {
-          print("Error stopping save: $e");
+      initialRoute: _initialRoute(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/admin':
+            if (AdminSession.isAuthenticated) {
+              return MaterialPageRoute(
+                builder: (_) => const AppShell(readOnly: false),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (_) => const AdminLoginPage(),
+            );
+          case '/':
+          default:
+            if (AdminSession.isAuthenticated) {
+              return MaterialPageRoute(
+                builder: (_) => const AppShell(readOnly: false),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (_) => const AppShell(readOnly: true),
+            );
         }
-      }
-    }
-    else{ //if not saving
-      try {
-        final body = {};
-        final response = await http.post(
-          Uri.parse(apiUrl('/save/start')),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: json.encode(body),
-        );
-        if (response.statusCode == 200) {
-          final responseData = json.decode(response.body);
-          print("Started saving data... Response: $responseData");
-          setState(() {
-            isSaving = true;
-          });
-        } else {
-          print("Failed to start saving data. Status: ${response.statusCode}, Body: ${response.body}");
-        }
-      } catch (e) {
-        print("Error starting save: $e");
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Center(
-          child: Padding(
-            padding: EdgeInsets.only(left: 250),
-            child: Text(
-              'SRP-APP',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: const Row(
-          children: const [
-            SizedBox(
-              width: 250,
-              child: Sidebar(),
-            ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: SingleChildScrollView(
-                  child: Home(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: toggleSaving,
-        label: Text(
-          isSaving ? 'Stop Saving' : 'Save Data',
-          style: const TextStyle(color: Colors.white),
-        ),
-        icon: Icon(
-          isSaving ? Icons.stop : Icons.save,
-          color: Colors.white,
-        ),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-      ),
+      },
     );
   }
 }

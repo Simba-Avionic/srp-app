@@ -20,7 +20,7 @@ loguru_logger.add(
     logs_path,
     rotation="2 GB",
     compression="zip",
-    level="ERROR",
+    level=os.environ.get("LOG_LEVEL", "INFO"),
     enqueue=True,
     backtrace=True,
     diagnose=False

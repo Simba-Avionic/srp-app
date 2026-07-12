@@ -7,24 +7,24 @@ from someipy.serialization import (
 
 @dataclass
 class SysStatType:
-    mem_usage: Float32
-    cpu_usage: Float32
-    disk_utilization: Float32
+    mem_usage: Uint8
+    cpu_usage: Uint8
+    disk_utilization: Uint8
 
     def __init__(self):
-        self.mem_usage = Float32()
-        self.cpu_usage = Float32()
-        self.disk_utilization = Float32()
+        self.mem_usage = Uint8()
+        self.cpu_usage = Uint8()
+        self.disk_utilization = Uint8()
 
     def from_json(self, json_obj):
-        self.mem_usage.value = float(json_obj['mem_usage'])
-        self.cpu_usage.value = float(json_obj['cpu_usage'])
-        self.disk_utilization.value = float(json_obj['disk_utilization'])
+        self.mem_usage.value = int(json_obj['mem_usage'])
+        self.cpu_usage.value = int(json_obj['cpu_usage'])
+        self.disk_utilization.value = int(json_obj['disk_utilization'])
 
     def deserialize(self, payload: bytes):
-        self.mem_usage.deserialize(payload[0:4])
-        self.cpu_usage.deserialize(payload[4:8])
-        self.disk_utilization.deserialize(payload[8:12])
+        self.mem_usage.deserialize(payload[0:1])
+        self.cpu_usage.deserialize(payload[1:2])
+        self.disk_utilization.deserialize(payload[2:3])
 
 @dataclass
 class RadioDataType:
