@@ -1,14 +1,17 @@
 import 'dart:io';
-import 'package:desktop/main.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:path/path.dart' as p;
 
-import '../views/home.dart';
 import 'csv_data_screen.dart';
 
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key});
+  final bool readOnly;
+
+  const Sidebar({
+    super.key,
+    this.readOnly = true,
+  });
 
   Future<List<List<dynamic>>> getCsvFileContent() async {
     final currentDir = Directory.current.path;
@@ -17,8 +20,7 @@ class Sidebar extends StatelessWidget {
     final file = File(filePath);
     if (await file.exists()) {
       final fileContent = await file.readAsString();
-      List<List<dynamic>> rows = CsvToListConverter().convert(fileContent);
-      return rows;
+      return CsvToListConverter().convert(fileContent);
     }
     return [];
   }
@@ -41,9 +43,15 @@ class Sidebar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           ListTile(
-            leading: const Icon(Icons.home, color: Colors.white, size: 35),
-            title: const Text('Home', style: TextStyle(color: Colors.white, fontSize: 24)),
-            onTap: () {},
+            leading: Icon(
+              readOnly ? Icons.visibility : Icons.admin_panel_settings,
+              color: Colors.white,
+              size: 35,
+            ),
+            title: Text(
+              readOnly ? 'Podgląd' : 'Admin',
+              style: const TextStyle(color: Colors.white, fontSize: 24),
+            ),
           ),
           const SizedBox(height: 10),
           ListTile(
@@ -51,6 +59,9 @@ class Sidebar extends StatelessWidget {
             title: const Text('data.csv', style: TextStyle(color: Colors.white)),
             onTap: () async {
               final csvRows = await getCsvFileContent();
+              if (!context.mounted) {
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
