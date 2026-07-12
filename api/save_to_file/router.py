@@ -8,7 +8,9 @@ from datetime import datetime
 
 from proxy.app.services.engineservice import EngineServiceManager
 from proxy.app.services.envapp import EnvAppManager
+from proxy.app.services.secenvapp import SecEnvAppManager
 from proxy.app.services.servoservice import ServoServiceManager
+from proxy.app.services.secservoservice import SecServoServiceManager
 from proxy.app.services.sysstatservice import SysStatServiceManager
 from proxy.app.services.envappfc import EnvAppFcManager
 from proxy.app.services.recoveryservice import RecoveryServiceManager
@@ -31,7 +33,21 @@ logger.info(f"CSV file will be saved to: {csv_filename}")
 
 csv_lock = asyncio.Lock()
 
-managers = [FcFileLoggerAppManager() ,EngineServiceManager(), EnvAppManager(), ServoServiceManager(), SysStatServiceManager(), EnvAppFcManager(), RecoveryServiceManager(), GPSServiceManager(), PrimerServiceManager(), FcSysStatServiceManager(), MainServiceManager()]
+managers = [
+    FcFileLoggerAppManager(),
+    EngineServiceManager(),
+    EnvAppManager(),
+    SecEnvAppManager(),
+    ServoServiceManager(),
+    SecServoServiceManager(),
+    SysStatServiceManager(),
+    EnvAppFcManager(),
+    RecoveryServiceManager(),
+    GPSServiceManager(),
+    PrimerServiceManager(),
+    FcSysStatServiceManager(),
+    MainServiceManager(),
+]
 
 # Task tracking
 save_task = None
