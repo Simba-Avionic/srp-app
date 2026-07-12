@@ -6,7 +6,12 @@ COPY desktop/pubspec.yaml desktop/pubspec.lock ./
 RUN flutter pub get
 
 COPY desktop/ ./
-RUN flutter build web --release --dart-define=BASE_URL= --no-wasm-dry-run
+
+ARG ADMIN_PASSWORD=srp-admin
+RUN flutter build web --release \
+    --dart-define=BASE_URL= \
+    --dart-define=ADMIN_PASSWORD=${ADMIN_PASSWORD} \
+    --no-wasm-dry-run
 
 FROM nginx:alpine
 

@@ -196,29 +196,29 @@ sudo ip addr add 127.0.0.2/24 dev lo
 
 #### Uruchomienie przez Docker
 
-Konfiguracja jest w `docker-compose.yml` (sekcja `proxy.environment`). Wartości można nadpisać plikiem `.env` w katalogu projektu:
+Obrazy są wpisane na sztywno w `docker-compose.yml` (`ghcr.io/simba-avionic/srp-app-*:latest`). W `.env` ustaw tylko to, co zależy od maszyny:
 
-```env
-INTERFACE_IP=192.168.10.49
-MULTICAST_GROUP=224.224.224.245
-SD_PORT=30490
-DESKTOP_PORT=8080
+```bash
+cp .env.example .env
+docker compose up --build -d
 ```
 
-| Parametr | Domyślnie | Dlaczego |
-|----------|-----------|----------|
-| `INTERFACE_IP` | `192.168.10.49` | W trybie `network_mode: host` proxy używa interfejsów hosta — ustaw IP RPi w LAN ECU |
-| `MULTICAST_GROUP` | `224.224.224.245` | Używany też w entrypoincie kontenera do dodania adresu na `lo` |
-| `SD_PORT` | `30490` | Port SOME/IP Service Discovery |
-| `NEXT_PORT` | `10260` | Dla generatorów kodu; w runtime nie jest krytyczny |
-| `DESKTOP_PORT` | `8080` | Port nginx z aplikacją Flutter web |
+Pobranie gotowych obrazów z GHCR (bez lokalnego buildu):
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+| Parametr w `.env` | Opis |
+|-------------------|------|
+| `INTERFACE_IP` | IP RPi w LAN ECU (proxy w `network_mode: host`) |
+| `MULTICAST_GROUP` | Adres multicast SOME/IP SD |
+| `SD_PORT` | Port Service Discovery |
+| `DESKTOP_PORT` | Port nginx z UI |
+| `ADMIN_PASSWORD` | Hasło trybu administratora |
 
 **Dlaczego proxy ma `network_mode: host`?**  
-SOME/IP wymaga UDP multicast na fizycznym interfejsie. W sieci bridge Dockera multicast do ECU zwykle nie działa poprawnie. Kontener desktop pozostaje w sieci bridge i proxuje API do `host.docker.internal:5000`.
-
-**Wolumeny:**
-- `./desktop/data/csv` — zapis danych CSV z przycisku „Save Data”
-- `./logs` — logi błędów aplikacji
+SOME/IP wymaga UDP multicast na fizycznym interfejsie. Kontener desktop proxuje API do `host.docker.internal:5000`.
 
 - Verify server and desktop app are communicating via the same address (lokalnie: `localhost:5000`; Docker: UI na porcie 8080, API proxowane przez nginx)
 
@@ -240,6 +240,7 @@ make run-proxy
 #### Docker
 
 ```bash
+cp .env.example .env   # pierwszy raz
 docker compose up --build -d
 ```
 
